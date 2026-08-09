@@ -46,28 +46,37 @@
     table th{background:#0A1A2F;color:white;}
 .search-box{margin:15px 0;}
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
-.client-form{max-width:600px;margin:50px auto;background:white;padding:20px;border-radius:12px;}
-.client-form h2{color:#0A1A2F;text-align:center;}
-/* HIDE BOTH BY DEFAULT */
-#adminApp, #clientApp{display:none;}
+
+/* CLIENT SHOP STYLE */
+#clientApp{background:#f5f7fa;padding:10px;}
+.client-header{text-align:center;padding:15px;background:white;border-radius:12px;margin-bottom:15px;}
+.client-header img{width:70px;}
+.client-grid{display:grid;grid-template-columns:1fr;gap:15px;}
+.client-card{background:white;border-radius:12px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
+.client-main-img{width:100%;height:220px;object-fit:cover;border-radius:8px;margin-bottom:8px;}
+.client-thumbs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.client-thumb{width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #ddd;cursor:pointer;}
+.client-thumb.active{border-color:#0A1A2F;}
+.client-title{font-size:18px;font-weight:bold;color:#0A1A2F;margin-bottom:5px;}
+.client-desc{background:#e3f2fd;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:8px;}
+.client-price{color:#0A1A2F;font-size:22px;font-weight:800;}
+.client-old-price{text-decoration:line-through;color:#999;font-size:14px;margin-left:8px;}
+.btn-request{width:100%;padding:14px;background:#0066CC;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
+.preview-multi{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.preview-multi img{width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #ddd;}
+#clientApp, #adminApp{display:none;}
 </style>
 </head>
 <body>
 
 <!-- CLIENT APP -->
 <div id="clientApp">
-    <div class="client-form">
-        <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png" style="width:80px;display:block;margin:0 auto 15px;">
+    <div class="client-header">
+        <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png">
         <h2>TCS PARTS BIZPORTAL</h2>
-        <h3 style="text-align:center;margin-bottom:15px;">Request a Car Part</h3>
-        <input type="text" id="cName" placeholder="Your Full Name" required>
-        <input type="tel" id="cPhone" placeholder="WhatsApp Number e.g 0712345678" required>
-        <input type="text" id="cVehicle" placeholder="Vehicle: e.g Toyota Hilux 2020">
-        <textarea id="cPart" placeholder="What part do you need? e.g Alternator for 2.4 GD6" rows="4" required style="width:100%;padding:14px;margin:8px 0;border:1px solid #e0e0e0;border-radius:10px;"></textarea>
-        <button class="btn-login" onclick="submitClientRequest()">Send Request</button>
-        <p id="cMsg" style="color:green;text-align:center;"></p>
-        <p style="text-align:center;margin-top:15px;font-size:12px;">Or WhatsApp: 0682547352</p>
+        <p>Available Parts - Request WhatsApp</p>
     </div>
+    <div class="client-grid" id="clientPartsList"><p style="text-align:center;">Loading parts...</p></div>
 </div>
 
 <!-- ADMIN APP -->
@@ -83,16 +92,11 @@
 
     <div class="container" id="formBox">
         <div class="header">
-            <div class="header-logo">
-                <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png">
-                <h2>TCS PARTS BIZPORTAL</h2>
-            </div>
+            <div class="header-logo"><img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png"><h2>TCS PARTS BIZPORTAL</h2></div>
             <span class="badge-ceo">CEO</span>
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
-
         <div class="banner">💼 BUSINESS SOLUTIONS & SERVICES 💼</div>
-
         <div class="tabs">
             <div class="tab" onclick="openTab('dashboard')">Dashboard</div>
             <div class="tab active" onclick="openTab('requests')">Requests</div>
@@ -109,29 +113,16 @@
                 <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
                 <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
             </div>
-            <div class="info-box">
-                🏦 <b>Business Account:</b> Standard Bank 10264594434 | Branch: 006145<br>
-                📱 <b>Orders WhatsApp:</b> 0682547352 | 0698949596
-            </div>
             <div class="share-box">
                 <h4>📱 Share Customer Service Link</h4>
-                <p>Customers use this link to request parts</p>
-                <div class="copy-group">
-                    <input type="text" id="customerLink" readonly>
-                    <button class="btn btn-blue" onclick="copyLink()">Copy</button>
-                </div>
+                <div class="copy-group"><input type="text" id="customerLink" readonly><button class="btn btn-blue" onclick="copyLink()">Copy</button></div>
                 <button class="btn btn-green" onclick="shareWhatsApp()">Send via WhatsApp</button>
             </div>
         </div>
 
         <div id="requests" class="tab-content active">
             <h3>📥 Customer Requests</h3>
-            <div class="table-wrapper">
-                <table id="requestsTable">
-                    <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr></thead>
-                    <tbody><tr><td colspan="7">Loading requests...</td></tr></tbody>
-                </table>
-            </div>
+            <div class="table-wrapper"><table id="requestsTable"><thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="vin" class="tab-content"><h3>🚗 VIN Decoder</h3><input type="text" id="vinInput" placeholder="Enter 17 Digit VIN"><button class="btn" onclick="decodeVIN()">Decode</button><div id="vinResult"></div></div>
@@ -144,8 +135,10 @@
             <input id="year" placeholder="Year e.g 2020">
             <input id="partName" placeholder="Part Name e.g Alternator">
             <input id="price" placeholder="Price R e.g 3500">
-            <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
-            <img id="preview" style="max-width:100%;display:none;border-radius:8px;">
+            <input id="oldPrice" placeholder="Old Price R e.g 4000 - optional">
+            <label style="font-weight:bold;">Upload Images - Select 1 to 4 photos</label>
+            <input type="file" id="imageFiles" accept="image/*" multiple onchange="previewImages(event)">
+            <div class="preview-multi" id="previewMulti"></div>
             <button class="btn" onclick="savePart()" style="width:100%;">Save Part</button>
             <button class="btn" onclick="resetForm()" style="background:#666;width:100%;">Clear</button>
             <p id="successMsg" style="color:green;"></p><p id="errorMsg" style="color:red;"></p>
@@ -153,9 +146,7 @@
 
         <div id="stock" class="tab-content">
             <h3>📦 Stock</h3>
-            <div class="search-box">
-                <input type="text" id="searchParts" placeholder="🔍 Search 10,000+ parts: Toyota, Hilux, Alternator..." onkeyup="searchParts()">
-            </div>
+            <div class="search-box"><input type="text" id="searchParts" placeholder="🔍 Search 10,000+ parts..." onkeyup="searchParts()"></div>
             <button class="btn" onclick="filterParts('available')">Available</button>
             <button class="btn" onclick="filterParts('sold')">Sold</button>
             <button class="btn" onclick="filterParts('all')">All</button>
@@ -187,31 +178,62 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
-let imageFile = null; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available';
+let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available';
 
 const urlParams = new URLSearchParams(window.location.search);
 const isClient = urlParams.has('client');
 const baseUrl = window.location.origin + window.location.pathname;
 const clientLink = `${baseUrl}?client=1`;
 
-// SHOW CORRECT APP
 if(isClient){
     document.getElementById('clientApp').style.display = 'block';
+    loadClientParts();
 } else {
     document.getElementById('adminApp').style.display = 'block';
-    document.getElementById('customerLink').value = clientLink; // AUTO SET LINK
+    document.getElementById('customerLink').value = clientLink;
 }
 
 // ========== CLIENT FUNCTIONS ==========
-window.submitClientRequest = async () => {
-    if(!cName.value ||!cPhone.value ||!cPart.value){ cMsg.innerText="Please fill name, phone and part"; cMsg.style.color="red"; return; }
-    await push(ref(db, 'tcs-parts-bizportal/requests'), {
-        name: cName.value, phone: cPhone.value, vehicle: cVehicle.value,
-        part: cPart.value, status: 'pending', date: new Date().toLocaleString()
+function loadClientParts(){
+    onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{
+        allPartsData=s.val()||{};
+        let parts = Object.entries(allPartsData).filter(([k,p])=>p.status!=='sold');
+        clientPartsList.innerHTML = '';
+        parts.forEach(([k,p])=>{
+            let images = p.images && p.images.length? p.images : [p.image||'https://via.placeholder.com/400x220'];
+            let thumbs = images.map((img,i)=>`<img src="${img}" class="client-thumb ${i===0?'active':''}" onclick="changeMainImg('${k}','${img}',this)">`).join('');
+            clientPartsList.innerHTML += `
+            <div class="client-card">
+                <img src="${images[0]}" class="client-main-img" id="main-${k}">
+                <div class="client-thumbs">${thumbs}</div>
+                <div class="client-title">${p.year} ${p.make} ${p.model} ${p.partName}</div>
+                <div class="client-desc">${p.year} ${p.make} ${p.model} ${p.partName} Used</div>
+                <div>
+                    <span class="client-price">R${Number(p.price).toLocaleString()}</span>
+                    ${p.oldPrice?`<span class="client-old-price">R${Number(p.oldPrice).toLocaleString()}</span>`:''}
+                </div>
+                <button class="btn-request" onclick="requestPart('${p.partName}','${p.make} ${p.model} ${p.year}')">Request Now</button>
+            </div>`;
+        });
     });
-    cMsg.innerText = "✅ Request sent! We will contact you on WhatsApp shortly.";
-    cMsg.style.color="green";
-    ['cName','cPhone','cVehicle','cPart'].forEach(id=>document.getElementById(id).value='');
+}
+
+window.changeMainImg = (id, src, el) => { 
+    document.getElementById(`main-${id}`).src = src; 
+    el.parentElement.querySelectorAll('.client-thumb').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+}
+
+window.requestPart = (partName, vehicle) => {
+    const name = prompt(`Request: ${partName}\n\nEnter your Name:`);
+    if(!name) return;
+    const phone = prompt("Enter your WhatsApp Number:");
+    if(!phone) return;
+    push(ref(db, 'tcs-parts-bizportal/requests'), {
+        name: name, phone: phone, vehicle: vehicle,
+        part: partName, status: 'pending', date: new Date().toLocaleString()
+    });
+    alert("✅ Request Sent! We will WhatsApp you shortly.");
 }
 
 // ========== ADMIN FUNCTIONS ==========
@@ -230,9 +252,19 @@ onAuthStateChanged(auth, (user) => {
 
 window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = "Login Failed: " + err.message); }
 window.logout = () => signOut(auth);
-window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
+
+window.previewImages = (e) => { 
+    imageFiles = Array.from(e.target.files).slice(0,4); // max 4 images
+    previewMulti.innerHTML = '';
+    imageFiles.forEach(file=>{
+        let img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        previewMulti.appendChild(img);
+    });
+}
+
 window.copyLink = () => { navigator.clipboard.writeText(clientLink); alert("Customer Link Copied!"); }
-window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('Request TCS Parts here: '+clientLink)}`, '_blank'); }
+window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('View TCS Parts: '+clientLink)}`, '_blank'); }
 
 window.searchParts = () => {
     const term = searchParts.value.toLowerCase();
@@ -267,9 +299,10 @@ window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc
 function displayParts(partsArray){
     partsList.innerHTML = partsArray.length? '' : '<p>No parts found</p>';
     partsArray.forEach(([k,p])=>{
+        let mainImg = p.images?.[0] || p.image || 'https://via.placeholder.com/90';
         partsList.innerHTML+=`
         <div class="part-item">
-            <img src="${p.image||'https://via.placeholder.com/90'}">
+            <img src="${mainImg}">
             <div class="part-info">
                 <b>${p.year} ${p.make} ${p.model}</b> <span style="background:${p.status==='sold'?'red':'#4CAF50'};color:white;padding:2px 6px;border-radius:4px;font-size:11px;">${p.status||'available'}</span><br>
                 ${p.partName}<br><b>R${Number(p.price).toLocaleString()}</b>
@@ -296,8 +329,9 @@ window.editPart = (id) => {
     const p = allPartsData[id];
     formTitle.innerText = "Edit Part";
     editId.value = id;
-    ['make','model','year','partName','price'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
-    preview.src = p.image; preview.style.display = 'block';
+    ['make','model','year','partName','price','oldPrice'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
+    previewMulti.innerHTML = '';
+    (p.images||[p.image]).forEach(img=>{ if(img) previewMulti.innerHTML += `<img src="${img}">` });
 }
 
 window.markSold = (id) => { if(confirm("Mark as SOLD?")) update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold'}); }
@@ -306,16 +340,27 @@ window.deletePart = (id) => { if(confirm("DELETE this part?")) remove(ref(db, `t
 window.savePart = async () => {
     errorMsg.innerText = ""; successMsg.innerText = "";
     if(!make.value ||!partName.value ||!price.value){ errorMsg.innerText = "Fill required fields"; return; }
-    let partData = { make: make.value, model: model.value, year: year.value, partName: partName.value, price: Number(price.value), status: 'available', dateAdded: new Date().toISOString() };
+    let partData = { make: make.value, model: model.value, year: year.value, partName: partName.value, price: Number(price.value), oldPrice: Number(oldPrice.value)||0, status: 'available', dateAdded: new Date().toISOString() };
     try {
-        if(imageFile){ const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name); const snap = await uploadBytes(fileRef, imageFile); partData.image = await getDownloadURL(snap.ref); }
-        else if(editId.value) { partData.image = preview.src; } else { errorMsg.innerText = "Select image"; return; }
+        let uploadedImages = [];
+        if(imageFiles.length > 0){
+            for(let file of imageFiles){
+                const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + file.name);
+                const snap = await uploadBytes(fileRef, file);
+                uploadedImages.push(await getDownloadURL(snap.ref));
+            }
+            partData.images = uploadedImages;
+            partData.image = uploadedImages[0]; // keep first image for backward compatibility
+        } else if(editId.value) { 
+            partData.images = allPartsData[editId.value].images || [previewMulti.querySelector('img')?.src]; 
+        } else { errorMsg.innerText = "Select at least 1 image"; return; }
+        
         if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); successMsg.innerText = "Part Updated!"; }
         else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); successMsg.innerText = "Part Added!"; }
         resetForm();
     } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
 }
-window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; ['make','model','year','partName','price'].forEach(k => document.getElementById(k).value = ''); preview.style.display = 'none'; imageFile = null; }
+window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; ['make','model','year','partName','price','oldPrice'].forEach(k => document.getElementById(k).value = ''); previewMulti.innerHTML = ''; imageFiles = []; }
 </script>
 </body>
 </html>
