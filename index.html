@@ -5,78 +5,183 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - TCS PARTS BIZPORTAL</title>
 <style>
-    body{font-family:Arial;background:#f4f4f4;padding:10px;margin:0;}
-.container{max-width:1000px;margin:auto;background:white;padding:15px;border-radius:12px;}
-    h2{color:#0A1A2F;text-align:center;margin:10px 0;}
-    input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;}
-    button{padding:10px 12px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;font-size:14px;}
-.btn-danger{background:#d32f2f;}
-.btn-sold{background:#4CAF50;}
-.btn-edit{background:#1976d2;}
-.login-box{display:block;}.form-box{display:none;}
-.success{color:green;text-align:center;}.error{color:red;text-align:center;font-weight:bold;}
-.preview-img{width:100%;max-height:250px;object-fit:cover;border-radius:8px;margin:10px 0;}
-.parts-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;} /* 1 column on mobile */
-.part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;align-items:flex-start;}
-.part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;flex-shrink:0;}
-.part-info{flex:1;word-break:break-word;} /* stops long text from breaking layout */
-.badge{background:#4CAF50;color:white;padding:3px 8px;border-radius:4px;font-size:12px;display:inline-block;margin:3px 0;}
-.badge.sold{background:red;}
-.btn-group button{width:100%;margin:4px 0;}
+    *{box-sizing:border-box;}
+    body{font-family:Arial;background:#0A1A2F;padding:10px;margin:0;}
+   .container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;}
+   .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
+   .header img{width:45px;height:45px;border-radius:12px;}
+   .header input{flex:1;min-width:150px;margin:0 10px;padding:10px;border-radius:20px;border:1px solid #ccc;}
+   .badge-ceo{background:#8B5CF6;color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+   .btn-logout{background:none;border:none;color:#555;font-weight:bold;cursor:pointer;}
 
-/* Tablet/Desktop: 2 columns */
-@media (min-width: 768px) {
- .parts-list{grid-template-columns:1fr 1fr;}
- .btn-group{display:flex;gap:5px;}
- .btn-group button{width:auto;flex:1;}
-}
+   .banner{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:15px;border-radius:12px;text-align:center;margin-bottom:15px;}
+
+    /* TABS */
+   .tabs{display:flex;border-bottom:2px solid #ddd;margin:15px 0;overflow-x:auto;}
+   .tab{padding:12px 20px;text-align:center;font-weight:bold;cursor:pointer;color:#555;white-space:nowrap;}
+   .tab.active{color:#0A1A2F;border-bottom:3px solid #FF8C00;}
+   .tab-content{display:none;}.tab-content.active{display:block;}
+
+    /* DASHBOARD CARDS */
+   .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:15px 0;}
+   .stat-card{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:20px;border-radius:12px;text-align:center;}
+   .stat-card h1{margin:0;font-size:28px;}
+   .stat-card p{margin:5px 0 0;font-size:12px;}
+   .info-box{background:#e3f2fd;border-left:4px solid #0A1A2F;padding:12px;border-radius:8px;margin:15px 0;font-size:14px;}
+   .share-box{background:#e3f2fd;padding:15px;border-radius:12px;margin:15px 0;}
+   .copy-group{display:flex;gap:8px;margin:10px 0;}
+   .copy-group input{flex:1;}
+
+    /* FORM + STOCK + TABLE */
+    input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
+   .btn{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
+   .btn-blue{background:#0A1A2F;}.btn-green{background:#25D366;}.btn-red{background:#d32f2f;}.btn-purple{background:#8B5CF6;}.btn-edit{background:#1976d2;}.btn-sold{background:#4CAF50;}
+   .preview-img{width:100%;max-height:250px;object-fit:cover;border-radius:8px;margin:10px 0;}
+   .parts-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;}
+   .part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
+   .part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+   .part-info{flex:1;word-break:break-word;}
+   .badge{background:#4CAF50;color:white;padding:3px 8px;border-radius:4px;font-size:12px;}
+   .badge.sold{background:red;}
+   .btn-group{display:flex;gap:5px;flex-wrap:wrap;}
+   .btn-group button{flex:1;min-width:80px;}
+    table{width:100%;border-collapse:collapse;margin:15px 0;font-size:13px;overflow-x:auto;display:block;}
+    table th,table td{border:1px solid #ddd;padding:8px;text-align:left;white-space:nowrap;}
+    table th{background:#0A1A2F;color:white;}
+   .login-box{display:block;}.form-box{display:none;}
+   .success{color:green;text-align:center;}.error{color:red;text-align:center;font-weight:bold;}
+    @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>TCS PARTS BIZPORTAL - Admin</h2>
-    <p id="loggedInAs" style="text-align:center;font-size:12px;"></p>
+    <div class="header">
+        <img src="https://via.placeholder.com/50/0A1A2F/FFFFFF?text=TC">
+        <input type="text" id="searchInput" placeholder="Search parts...">
+        <button class="btn">🌙</button>
+        <span class="badge-ceo">CEO</span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="banner"><h3>💼 BUSINESS SOLUTIONS & SERVICES 💼</h3></div>
 
     <div class="login-box" id="loginBox">
         <h3>Admin Login</h3>
+        <p style="font-size:12px;">Only: ceo@tcspartsbizportal.co.za or manager@tcspartsbizportal.co.za</p>
         <input type="email" id="email" placeholder="Admin Email">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="login()" style="width:100%;">Login</button>
+        <button class="btn" onclick="login()" style="width:100%;">Login</button>
         <p id="loginError" class="error"></p>
     </div>
 
     <div class="form-box" id="formBox">
-        <h3 id="formTitle">Add New Part</h3>
-        <input type="hidden" id="editId">
-        <input type="text" id="make" placeholder="Make e.g Toyota" required>
-        <input type="text" id="model" placeholder="Model e.g Hilux" required>
-        <input type="number" id="year" placeholder="Year e.g 2020" required>
-        <input type="text" id="partName" placeholder="Part Name e.g Alternator" required>
-        <input type="text" id="partCode" placeholder="Part Code">
-        <input type="number" id="price" placeholder="Price R e.g 3450" required>
-        <select id="condition"><option>Used</option><option>New</option><option>Refurb</option></select>
-        <select id="category"><option value="used">Used Parts</option><option value="new">New Parts</option><option value="stripped">Stripped Vehicle</option></select>
-        <select id="vehicleType"><option value="car">Car</option><option value="bakkie">Bakkie</option><option value="suv">SUV</option></select>
-        <input type="text" id="warranty" placeholder="Warranty e.g 90 Day">
-        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
-        <img id="preview" class="preview-img" style="display:none;">
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('dashboard')">Dashboard</div>
+            <div class="tab" onclick="openTab('requests')">Requests</div>
+            <div class="tab" onclick="openTab('vin')">VIN Decoder</div>
+            <div class="tab" onclick="openTab('services')">Add Part</div>
+            <div class="tab" onclick="openTab('stock')">Stock</div>
+            <div class="tab" onclick="openTab('users')">Users</div>
+            <div class="tab" onclick="openTab('reports')">Reports</div>
+        </div>
 
-        <button onclick="savePart()" style="width:100%;">Save Part</button>
-        <button onclick="resetForm()" style="background:#666;width:100%;">Clear</button>
-        <button onclick="logout()" style="background:#333;width:100%;margin-top:10px;">Logout</button>
-        <p id="successMsg" class="success"></p>
-        <p id="errorMsg" class="error"></p>
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <h3>📊 Dashboard</h3>
+            <div class="stats-grid">
+                <div class="stat-card"><h1 id="totalParts">0</h1><p>Total Parts</p></div>
+                <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
+                <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
+            </div>
+            <div class="info-box">
+                🏦 <b>Business Account:</b> Standard Bank<br>
+                10264594434 | Branch: 006145<br>
+                📱 <b>Orders WhatsApp:</b> 0682547352 | 0698949596
+            </div>
+            <button class="btn btn-blue">📄 Quick Invoice</button>
+            <div class="share-box">
+                <h4>📱 Share Customer Service Link</h4>
+                <p>Send this link to customers so they can request parts online</p>
+                <div class="copy-group">
+                    <input type="text" id="customerLink" value="https://tcs-parts-bizportal.web.app/customer.html" readonly>
+                    <button class="btn btn-copy" onclick="copyLink()">Copy</button>
+                </div>
+                <button class="btn btn-green" onclick="shareWhatsApp()">WhatsApp</button>
+            </div>
+        </div>
 
-        <hr>
-        <h3>Stock</h3>
-        <button onclick="filterParts('available')">Available</button>
-        <button onclick="filterParts('sold')">Sold</button>
-        <button onclick="filterParts('all')">All</button>
-        <div class="parts-list" id="partsList">Loading...</div>
+        <!-- REQUESTS -->
+        <div id="requests" class="tab-content">
+            <h3>📥 Customer Requests</h3>
+            <table id="requestsTable">
+                <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part Needed</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody><tr><td colspan="7">Loading...</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- VIN DECODER -->
+        <div id="vin" class="tab-content">
+            <h3>🚗 VIN Decoder</h3>
+            <input type="text" id="vinInput" placeholder="Enter 17 Digit VIN e.g WBAKB4C50BE309123" maxlength="17">
+            <button class="btn" onclick="decodeVIN()">Decode VIN</button>
+            <div id="vinResult" style="margin-top:15px;"></div>
+        </div>
+
+        <!-- ADD PART -->
+        <div id="services" class="tab-content">
+            <h3 id="formTitle">Add New Part</h3>
+            <input type="hidden" id="editId">
+            <input type="text" id="make" placeholder="Make e.g Toyota" required>
+            <input type="text" id="model" placeholder="Model e.g Hilux" required>
+            <input type="number" id="year" placeholder="Year e.g 2020" required>
+            <input type="text" id="partName" placeholder="Part Name e.g Alternator" required>
+            <input type="text" id="partCode" placeholder="Part Code">
+            <input type="number" id="price" placeholder="Price R e.g 3450" required>
+            <select id="condition"><option>Used</option><option>New</option><option>Refurb</option></select>
+            <select id="category"><option value="used">Used Parts</option><option value="new">New Parts</option><option value="stripped">Stripped Vehicle</option></select>
+            <select id="vehicleType"><option value="car">Car</option><option value="bakkie">Bakkie</option><option value="suv">SUV</option></select>
+            <input type="text" id="warranty" placeholder="Warranty e.g 90 Day">
+            <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+            <img id="preview" class="preview-img" style="display:none;">
+            <button class="btn" onclick="savePart()" style="width:100%;">Save Part</button>
+            <button class="btn" onclick="resetForm()" style="background:#666;width:100%;">Clear</button>
+            <p id="successMsg" class="success"></p><p id="errorMsg" class="error"></p>
+        </div>
+
+        <!-- STOCK -->
+        <div id="stock" class="tab-content">
+            <h3>📦 Stock</h3>
+            <button class="btn" onclick="filterParts('available')">Available</button>
+            <button class="btn" onclick="filterParts('sold')">Sold</button>
+            <button class="btn" onclick="filterParts('all')">All</button>
+            <div class="parts-list" id="partsList">Loading...</div>
+        </div>
+
+        <!-- USERS -->
+        <div id="users" class="tab-content">
+            <h3>👥 Admin Users</h3>
+            <table>
+                <thead><tr><th>Email</th><th>Role</th><th>Access</th></tr></thead>
+                <tbody>
+                    <tr><td>ceo@tcspartsbizportal.co.za</td><td>CEO</td><td>Full Access</td></tr>
+                    <tr><td>manager@tcspartsbizportal.co.za</td><td>Manager</td><td>Full Access</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="reports" class="tab-content">
+            <h3>📑 Download Reports</h3>
+            <button class="btn btn-purple" onclick="downloadCSV()">📊 Download CSV Spreadsheet</button>
+            <button class="btn btn-red" onclick="downloadPDF()">📄 Download PDF Report</button>
+            <p style="font-size:12px;">Reports include all parts in stock with prices and status</p>
+        </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -97,31 +202,92 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
+let imageFile = null; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available';
 
-let imageFile = null; let allPartsData = {}; let currentFilter = 'available';
+// TABS
+window.openTab = (tabName) => {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+}
 
 onAuthStateChanged(auth, (user) => {
   if (user && ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'].includes(user.email)) {
-    loggedInAs.innerText = "Logged in as: " + user.email;
-    loginBox.style.display = 'none'; formBox.style.display = 'block'; loadParts();
+    loginBox.style.display = 'none'; formBox.style.display = 'block';
+    loadParts(); loadRequests();
   } else { loginBox.style.display = 'block'; formBox.style.display = 'none'; }
 });
 
-window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = "Login Failed: " + err.message); }
+window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = err.message); }
 window.logout = () => signOut(auth);
 window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
+window.copyLink = () => { navigator.clipboard.writeText(customerLink.value); alert("Link Copied!"); }
+window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('Request car parts here: '+customerLink.value)}`, '_blank'); }
+
+// VIN DECODER
+window.decodeVIN = () => {
+    const vin = vinInput.value;
+    if(vin.length!== 17){ vinResult.innerHTML = "<p class='error'>VIN must be 17 characters</p>"; return; }
+    vinResult.innerHTML = `<div class="info-box"><b>VIN:</b> ${vin}<br><b>Status:</b> Demo Mode<br>Connect to RapidAPI VIN Decoder for real vehicle data</div>`;
+}
+
+// REPORTS
+window.downloadCSV = () => {
+    let csv = 'Year,Make,Model,Part Name,Price,Status,Category\n';
+    Object.values(allPartsData).forEach(p => {
+        csv += `${p.year},${p.make},${p.model},${p.partName},${p.price},${p.status},${p.category}\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'TCS_Stock_Report.csv'; a.click();
+}
+
+window.downloadPDF = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16); doc.text("TCS PARTS BIZPORTAL - STOCK REPORT", 14, 15);
+    let y = 30;
+    Object.values(allPartsData).forEach(p => {
+        doc.setFontSize(10);
+        doc.text(`${p.year} ${p.make} ${p.model} - ${p.partName} - R${p.price} - ${p.status}`, 14, y);
+        y += 8; if(y > 270){ doc.addPage(); y=20; }
+    });
+    doc.save("TCS_Stock_Report.pdf");
+}
+
+// LOAD DATA
+function updateDashboard(){
+    const parts = Object.values(allPartsData);
+    const requests = Object.values(allRequestsData);
+    totalParts.innerText = parts.length;
+    totalRequests.innerText = requests.length;
+    pendingRequests.innerText = requests.filter(r => r.status === 'pending').length;
+}
 
 function loadParts(){
     onValue(ref(db, 'tcs-parts-bizportal/categories'), (snapshot) => {
-        allPartsData = snapshot.val() || {}; filterParts(currentFilter);
-    }, (error) => { errorMsg.innerText = "DB Error: " + error.message });
+        allPartsData = snapshot.val() || {}; updateDashboard(); filterParts(currentFilter);
+    });
 }
+function loadRequests(){
+    onValue(ref(db, 'tcs-parts-bizportal/requests'), (snapshot) => {
+        allRequestsData = snapshot.val() || {}; updateDashboard();
+        let tbody = '';
+        Object.entries(allRequestsData).forEach(([key, r]) => {
+            tbody += `<tr>
+                <td>${r.date}</td><td>${r.name}</td><td>${r.phone}</td><td>${r.vehicle||'-'}</td><td>${r.part}</td>
+                <td><span class="badge ${r.status}">${r.status}</span></td>
+                <td><button class="btn btn-green" onclick="markDone('${key}')">Mark Done</button></td>
+            </tr>`;
+        });
+        requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
+    });
+}
+window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 
 window.filterParts = (filter) => {
-    currentFilter = filter;
-    partsList.innerHTML = '';
-    Object.keys(allPartsData).forEach(key => {
-        const p = allPartsData[key];
+    currentFilter = filter; partsList.innerHTML = '';
+    Object.entries(allPartsData).forEach(([key, p]) => {
         if(filter === 'available' && p.status === 'sold') return;
         if(filter === 'sold' && p.status!== 'sold') return;
         partsList.innerHTML += `
@@ -129,72 +295,33 @@ window.filterParts = (filter) => {
             <img src="${p.image || 'https://via.placeholder.com/100'}">
             <div class="part-info">
                 <b>${p.year} ${p.make} ${p.model}</b> <span class="badge ${p.status}">${p.status || 'available'}</span><br>
-                <b>${p.partName}</b><br>
-                R${p.price?.toLocaleString()}<br>
+                <b>${p.partName}</b><br> R${Number(p.price).toLocaleString()}<br>
                 <div class="btn-group">
-                  <button class="btn-edit" onclick='editPart("${key}")'>Edit</button>
-                  ${p.status!=='sold'?`<button class="btn-sold" onclick='markSold("${key}")'>Mark SOLD</button>`:''}
-                  <button class="btn-danger" onclick='deletePart("${key}")'>Delete</button>
+                  <button class="btn btn-edit" onclick='editPart("${key}")'>Edit</button>
+                  ${p.status!=='sold'?`<button class="btn btn-sold" onclick='markSold("${key}")'>SOLD</button>`:''}
+                  <button class="btn btn-red" onclick='deletePart("${key}")'>Delete</button>
                 </div>
             </div>
         </div>`;
     });
 }
 
-window.markSold = (id) => {
-    if(confirm("Mark this part as SOLD?")){
-        update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold', dateSold: new Date().toISOString()})
-       .catch(err => errorMsg.innerText = "Error: " + err.message);
-    }
-}
-
-window.deletePart = (id) => { // NEW DELETE FUNCTION
-    if(confirm("Are you sure you want to DELETE this part? This cannot be undone.")){
-        remove(ref(db, `tcs-parts-bizportal/categories/${id}`))
-       .then(()=> successMsg.innerText = "Part Deleted")
-       .catch(err => errorMsg.innerText = "Delete Error: " + err.message);
-    }
-}
-
-window.editPart = (id) => {
-    const p = allPartsData[id]; formTitle.innerText = "Edit Part"; editId.value = id;
-    ['make','model','year','partName','partCode','price','condition','category','vehicleType','warranty'].forEach(k => {
-        if(document.getElementById(k)) document.getElementById(k).value = p[k] || '';
-    });
-    preview.src = p.image; preview.style.display = 'block'; window.scrollTo(0,0);
-}
+window.markSold = (id) => { if(confirm("Mark as SOLD?")) update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold', dateSold: new Date().toISOString()}); }
+window.deletePart = (id) => { if(confirm("DELETE this part?")) remove(ref(db, `tcs-parts-bizportal/categories/${id}`)); }
+window.editPart = (id) => { openTab('services'); const p = allPartsData[id]; formTitle.innerText = "Edit Part"; editId.value = id; ['make','model','year','partName','partCode','price','condition','category','vehicleType','warranty'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; }); preview.src = p.image; preview.style.display = 'block'; }
 
 window.savePart = async () => {
     errorMsg.innerText = ""; successMsg.innerText = "";
-    if(!make.value ||!model.value ||!year.value ||!partName.value ||!price.value){ errorMsg.innerText = "Please fill all required fields"; return; }
-
-    let partData = {
-        make: make.value, model: model.value, year: year.value, partName: partName.value,
-        partCode: partCode.value, price: Number(price.value), condition: condition.value,
-        category: category.value, vehicleType: vehicleType.value, warranty: warranty.value,
-        location: "Burgersfort", status: 'available', dateAdded: new Date().toISOString()
-    };
-
+    if(!make.value ||!partName.value ||!price.value){ errorMsg.innerText = "Fill required fields"; return; }
+    let partData = { make: make.value, model: model.value, year: year.value, partName: partName.value, partCode: partCode.value, price: Number(price.value), condition: condition.value, category: category.value, vehicleType: vehicleType.value, warranty: warranty.value, location: "Burgersfort", status: 'available', dateAdded: new Date().toISOString() };
     try {
-        if(imageFile){
-            const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name);
-            const snap = await uploadBytes(fileRef, imageFile);
-            partData.image = await getDownloadURL(snap.ref);
-        } else if(editId.value) { partData.image = preview.src; }
-        else { errorMsg.innerText = "Please select an image"; return; }
-
-        if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); }
-        else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); }
-
-        successMsg.innerText = "Part Saved Successfully!"; resetForm();
+        if(imageFile){ const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name); const snap = await uploadBytes(fileRef, imageFile); partData.image = await getDownloadURL(snap.ref); }
+        else if(editId.value) { partData.image = preview.src; } else { errorMsg.innerText = "Select image"; return; }
+        if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); } else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); }
+        successMsg.innerText = "Part Saved!"; resetForm();
     } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
 }
-
-window.resetForm = () => {
-    formTitle.innerText = "Add New Part"; editId.value = '';
-    document.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
-    preview.style.display = 'none'; imageFile = null;
-}
+window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; document.querySelectorAll('#services input[type=text], #services input[type=number]').forEach(i => i.value = ''); preview.style.display = 'none'; imageFile = null; }
 </script>
 </body>
 </html>
