@@ -10,7 +10,7 @@
 .login-container{background:white;width:100%;max-width:400px;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;margin:50px auto;}
 .logo-img{width:90px;height:90px;border-radius:20px;object-fit:cover;margin-bottom:15px;}
     h1{color:#0A1A2F;font-size:22px;font-weight:800;margin-bottom:25px;}
-    input{width:100%;padding:14px;margin:8px 0;border:1px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;}
+    input,select{width:100%;padding:14px;margin:8px 0;border:1px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;}
 .btn-login{width:100%;padding:14px;background:#FF8C00;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
 .error{color:red;text-align:center;font-size:14px;margin-top:10px;font-weight:bold;}
 .container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;width:100%;}
@@ -46,11 +46,15 @@
     table th{background:#0A1A2F;color:white;}
 .search-box{margin:15px 0;}
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
+.category-badge{background:#8B5CF6;color:white;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;}
 
 /* CLIENT SHOP STYLE */
 #clientApp{background:#f5f7fa;padding:10px;}
 .client-header{text-align:center;padding:15px;background:white;border-radius:12px;margin-bottom:15px;}
 .client-header img{width:70px;}
+.client-filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0;margin-bottom:15px;}
+.client-filter-btn{padding:8px 14px;background:white;border:2px solid #0A1A2F;border-radius:20px;font-weight:bold;white-space:nowrap;cursor:pointer;}
+.client-filter-btn.active{background:#0A1A2F;color:white;}
 .client-grid{display:grid;grid-template-columns:1fr;gap:15px;}
 .client-card{background:white;border-radius:12px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
 .client-main-img{width:100%;height:220px;object-fit:cover;border-radius:8px;margin-bottom:8px;}
@@ -75,6 +79,14 @@
         <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png">
         <h2>TCS PARTS BIZPORTAL</h2>
         <p>Available Parts - Request WhatsApp</p>
+    </div>
+    <div class="client-filters" id="clientFilters">
+        <button class="client-filter-btn active" onclick="filterClient('all',this)">All</button>
+        <button class="client-filter-btn" onclick="filterClient('Doors',this)">Doors</button>
+        <button class="client-filter-btn" onclick="filterClient('Boots',this)">Boots/Tailgate</button>
+        <button class="client-filter-btn" onclick="filterClient('Rims',this)">Rims</button>
+        <button class="client-filter-btn" onclick="filterClient('Engine',this)">Engine</button>
+        <button class="client-filter-btn" onclick="filterClient('Electrical',this)">Wires/Modules</button>
     </div>
     <div class="client-grid" id="clientPartsList"><p style="text-align:center;">Loading parts...</p></div>
 </div>
@@ -133,7 +145,22 @@
             <input id="make" placeholder="Make e.g Toyota">
             <input id="model" placeholder="Model e.g Hilux">
             <input id="year" placeholder="Year e.g 2020">
-            <input id="partName" placeholder="Part Name e.g Alternator">
+            <select id="category">
+                <option value="">Select Category</option>
+                <option>Doors</option>
+                <option>Boots</option>
+                <option>Bonnet</option>
+                <option>Rims</option>
+                <option>Engine</option>
+                <option>Gearbox</option>
+                <option>Electrical</option>
+                <option>Wires</option>
+                <option>Modules</option>
+                <option>Interior</option>
+                <option>Suspension</option>
+                <option>Other</option>
+            </select>
+            <input id="partName" placeholder="Part Name e.g Front Left Door">
             <input id="price" placeholder="Price R e.g 3500">
             <input id="oldPrice" placeholder="Old Price R e.g 4000 - optional">
             <label style="font-weight:bold;">Upload Images - Select 1 to 4 photos</label>
@@ -146,7 +173,7 @@
 
         <div id="stock" class="tab-content">
             <h3>📦 Stock</h3>
-            <div class="search-box"><input type="text" id="searchParts" placeholder="🔍 Search 10,000+ parts..." onkeyup="searchParts()"></div>
+            <div class="search-box"><input type="text" id="searchParts" placeholder="🔍 Search by Make, Model, Part, Category..." onkeyup="searchParts()"></div>
             <button class="btn" onclick="filterParts('available')">Available</button>
             <button class="btn" onclick="filterParts('sold')">Sold</button>
             <button class="btn" onclick="filterParts('all')">All</button>
@@ -178,7 +205,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
-let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available';
+let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available'; let currentClientFilter = 'all';
 
 const urlParams = new URLSearchParams(window.location.search);
 const isClient = urlParams.has('client');
@@ -197,29 +224,40 @@ if(isClient){
 function loadClientParts(){
     onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{
         allPartsData=s.val()||{};
-        let parts = Object.entries(allPartsData).filter(([k,p])=>p.status!=='sold');
-        clientPartsList.innerHTML = '';
-        parts.forEach(([k,p])=>{
-            let images = p.images && p.images.length? p.images : [p.image||'https://via.placeholder.com/400x220'];
-            let thumbs = images.map((img,i)=>`<img src="${img}" class="client-thumb ${i===0?'active':''}" onclick="changeMainImg('${k}','${img}',this)">`).join('');
-            clientPartsList.innerHTML += `
-            <div class="client-card">
-                <img src="${images[0]}" class="client-main-img" id="main-${k}">
-                <div class="client-thumbs">${thumbs}</div>
-                <div class="client-title">${p.year} ${p.make} ${p.model} ${p.partName}</div>
-                <div class="client-desc">${p.year} ${p.make} ${p.model} ${p.partName} Used</div>
-                <div>
-                    <span class="client-price">R${Number(p.price).toLocaleString()}</span>
-                    ${p.oldPrice?`<span class="client-old-price">R${Number(p.oldPrice).toLocaleString()}</span>`:''}
-                </div>
-                <button class="btn-request" onclick="requestPart('${p.partName}','${p.make} ${p.model} ${p.year}')">Request Now</button>
-            </div>`;
-        });
+        filterClient(currentClientFilter);
     });
 }
 
-window.changeMainImg = (id, src, el) => { 
-    document.getElementById(`main-${id}`).src = src; 
+window.filterClient = (cat, btn) => {
+    currentClientFilter = cat;
+    document.querySelectorAll('.client-filter-btn').forEach(b=>b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+
+    let parts = Object.entries(allPartsData).filter(([k,p])=>p.status!=='sold');
+    if(cat!== 'all') parts = parts.filter(([k,p])=>p.category === cat);
+
+    clientPartsList.innerHTML = '';
+    parts.forEach(([k,p])=>{
+        let images = p.images && p.images.length? p.images : [p.image||'https://via.placeholder.com/400x220'];
+        let thumbs = images.map((img,i)=>`<img src="${img}" class="client-thumb ${i===0?'active':''}" onclick="changeMainImg('${k}','${img}',this)">`).join('');
+        clientPartsList.innerHTML += `
+        <div class="client-card">
+            <img src="${images[0]}" class="client-main-img" id="main-${k}">
+            <div class="client-thumbs">${thumbs}</div>
+            <div class="client-title">${p.year} ${p.make} ${p.model} ${p.partName}</div>
+            <div class="client-desc"><span class="category-badge">${p.category||'Other'}</span> ${p.year} ${p.make} ${p.model} ${p.partName} Used</div>
+            <div>
+                <span class="client-price">R${Number(p.price).toLocaleString()}</span>
+                ${p.oldPrice?`<span class="client-old-price">R${Number(p.oldPrice).toLocaleString()}</span>`:''}
+            </div>
+            <button class="btn-request" onclick="requestPart('${p.partName}','${p.make} ${p.model} ${p.year}')">Request Now</button>
+        </div>`;
+    });
+    if(parts.length===0) clientPartsList.innerHTML='<p style="text-align:center;">No parts in this category</p>';
+}
+
+window.changeMainImg = (id, src, el) => {
+    document.getElementById(`main-${id}`).src = src;
     el.parentElement.querySelectorAll('.client-thumb').forEach(t=>t.classList.remove('active'));
     el.classList.add('active');
 }
@@ -253,8 +291,8 @@ onAuthStateChanged(auth, (user) => {
 window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = "Login Failed: " + err.message); }
 window.logout = () => signOut(auth);
 
-window.previewImages = (e) => { 
-    imageFiles = Array.from(e.target.files).slice(0,4); // max 4 images
+window.previewImages = (e) => {
+    imageFiles = Array.from(e.target.files).slice(0,4);
     previewMulti.innerHTML = '';
     imageFiles.forEach(file=>{
         let img = document.createElement('img');
@@ -272,6 +310,7 @@ window.searchParts = () => {
         p.make?.toLowerCase().includes(term) ||
         p.model?.toLowerCase().includes(term) ||
         p.partName?.toLowerCase().includes(term) ||
+        p.category?.toLowerCase().includes(term) ||
         p.year?.toString().includes(term)
     ));
 }
@@ -293,8 +332,8 @@ function loadData(){
 
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
-window.downloadCSV = () => {let csv='Year,Make,Model,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
-window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
+window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
+window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
 
 function displayParts(partsArray){
     partsList.innerHTML = partsArray.length? '' : '<p>No parts found</p>';
@@ -304,7 +343,7 @@ function displayParts(partsArray){
         <div class="part-item">
             <img src="${mainImg}">
             <div class="part-info">
-                <b>${p.year} ${p.make} ${p.model}</b> <span style="background:${p.status==='sold'?'red':'#4CAF50'};color:white;padding:2px 6px;border-radius:4px;font-size:11px;">${p.status||'available'}</span><br>
+                <b>${p.year} ${p.make} ${p.model}</b> <span class="category-badge">${p.category||'Other'}</span> <span style="background:${p.status==='sold'?'red':'#4CAF50'};color:white;padding:2px 6px;border-radius:4px;font-size:11px;">${p.status||'available'}</span><br>
                 ${p.partName}<br><b>R${Number(p.price).toLocaleString()}</b>
                 <div class="btn-group">
                     <button class="btn btn-edit" onclick="editPart('${k}')">Edit</button>
@@ -329,7 +368,7 @@ window.editPart = (id) => {
     const p = allPartsData[id];
     formTitle.innerText = "Edit Part";
     editId.value = id;
-    ['make','model','year','partName','price','oldPrice'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
+    ['make','model','year','partName','price','oldPrice','category'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
     previewMulti.innerHTML = '';
     (p.images||[p.image]).forEach(img=>{ if(img) previewMulti.innerHTML += `<img src="${img}">` });
 }
@@ -339,8 +378,8 @@ window.deletePart = (id) => { if(confirm("DELETE this part?")) remove(ref(db, `t
 
 window.savePart = async () => {
     errorMsg.innerText = ""; successMsg.innerText = "";
-    if(!make.value ||!partName.value ||!price.value){ errorMsg.innerText = "Fill required fields"; return; }
-    let partData = { make: make.value, model: model.value, year: year.value, partName: partName.value, price: Number(price.value), oldPrice: Number(oldPrice.value)||0, status: 'available', dateAdded: new Date().toISOString() };
+    if(!make.value ||!partName.value ||!price.value ||!category.value){ errorMsg.innerText = "Fill Make, Category, Part Name and Price"; return; }
+    let partData = { make: make.value, model: model.value, year: year.value, category: category.value, partName: partName.value, price: Number(price.value), oldPrice: Number(oldPrice.value)||0, status: 'available', dateAdded: new Date().toISOString() };
     try {
         let uploadedImages = [];
         if(imageFiles.length > 0){
@@ -350,17 +389,17 @@ window.savePart = async () => {
                 uploadedImages.push(await getDownloadURL(snap.ref));
             }
             partData.images = uploadedImages;
-            partData.image = uploadedImages[0]; // keep first image for backward compatibility
-        } else if(editId.value) { 
-            partData.images = allPartsData[editId.value].images || [previewMulti.querySelector('img')?.src]; 
+            partData.image = uploadedImages[0];
+        } else if(editId.value) {
+            partData.images = allPartsData[editId.value].images || [previewMulti.querySelector('img')?.src];
         } else { errorMsg.innerText = "Select at least 1 image"; return; }
-        
+
         if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); successMsg.innerText = "Part Updated!"; }
         else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); successMsg.innerText = "Part Added!"; }
         resetForm();
     } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
 }
-window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; ['make','model','year','partName','price','oldPrice'].forEach(k => document.getElementById(k).value = ''); previewMulti.innerHTML = ''; imageFiles = []; }
+window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; ['make','model','year','partName','price','oldPrice','category'].forEach(k => document.getElementById(k).value = ''); previewMulti.innerHTML = ''; imageFiles = []; }
 </script>
 </body>
 </html>
