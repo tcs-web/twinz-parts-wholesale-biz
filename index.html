@@ -5,31 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - TCS PARTS BIZPORTAL</title>
 <style>
-    body{font-family:Arial;background:#f4f4f4;padding:20px;}
-.container{max-width:1000px;margin:auto;background:white;padding:20px;border-radius:12px;}
-    h2{color:#0A1A2F;text-align:center;}
-    input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
-    button{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
+    body{font-family:Arial;background:#f4f4f4;padding:10px;margin:0;}
+.container{max-width:1000px;margin:auto;background:white;padding:15px;border-radius:12px;}
+    h2{color:#0A1A2F;text-align:center;margin:10px 0;}
+    input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;}
+    button{padding:10px 12px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;font-size:14px;}
+.btn-danger{background:#d32f2f;}
 .btn-sold{background:#4CAF50;}
+.btn-edit{background:#1976d2;}
 .login-box{display:block;}.form-box{display:none;}
 .success{color:green;text-align:center;}.error{color:red;text-align:center;font-weight:bold;}
-.preview-img{width:100%;height:200px;object-fit:cover;border-radius:8px;margin:10px 0;}
-.parts-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
-.part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
-.part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;}
-.badge{background:#4CAF50;color:white;padding:3px 8px;border-radius:4px;font-size:12px;}
+.preview-img{width:100%;max-height:250px;object-fit:cover;border-radius:8px;margin:10px 0;}
+.parts-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px;} /* 1 column on mobile */
+.part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;align-items:flex-start;}
+.part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+.part-info{flex:1;word-break:break-word;} /* stops long text from breaking layout */
+.badge{background:#4CAF50;color:white;padding:3px 8px;border-radius:4px;font-size:12px;display:inline-block;margin:3px 0;}
 .badge.sold{background:red;}
+.btn-group button{width:100%;margin:4px 0;}
+
+/* Tablet/Desktop: 2 columns */
+@media (min-width: 768px) {
+ .parts-list{grid-template-columns:1fr 1fr;}
+ .btn-group{display:flex;gap:5px;}
+ .btn-group button{width:auto;flex:1;}
+}
 </style>
 </head>
 <body>
 
 <div class="container">
     <h2>TCS PARTS BIZPORTAL - Admin</h2>
-    <p id="loggedInAs" style="text-align:center;"></p>
+    <p id="loggedInAs" style="text-align:center;font-size:12px;"></p>
 
     <div class="login-box" id="loginBox">
         <h3>Admin Login</h3>
-        <p style="font-size:12px;">Only: ceo@tcspartsbizportal.co.za or manager@tcspartsbizportal.co.za</p>
         <input type="email" id="email" placeholder="Admin Email">
         <input type="password" id="password" placeholder="Password">
         <button onclick="login()" style="width:100%;">Login</button>
@@ -52,8 +62,8 @@
         <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
         <img id="preview" class="preview-img" style="display:none;">
 
-        <button onclick="savePart()">Save Part</button>
-        <button onclick="resetForm()" style="background:#666;">Clear</button>
+        <button onclick="savePart()" style="width:100%;">Save Part</button>
+        <button onclick="resetForm()" style="background:#666;width:100%;">Clear</button>
         <button onclick="logout()" style="background:#333;width:100%;margin-top:10px;">Logout</button>
         <p id="successMsg" class="success"></p>
         <p id="errorMsg" class="error"></p>
@@ -70,7 +80,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -91,63 +101,58 @@ const storage = getStorage(app);
 let imageFile = null; let allPartsData = {}; let currentFilter = 'available';
 
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById('loggedInAs').innerText = "Logged in as: " + user.email;
-    const allowed = ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'];
-    if(allowed.includes(user.email)){
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('formBox').style.display = 'block';
-      loadParts();
-    } else {
-      document.getElementById('errorMsg').innerText = "This email is not an admin";
-      signOut(auth);
-    }
-  } else {
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('formBox').style.display = 'none';
-  }
+  if (user && ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'].includes(user.email)) {
+    loggedInAs.innerText = "Logged in as: " + user.email;
+    loginBox.style.display = 'none'; formBox.style.display = 'block'; loadParts();
+  } else { loginBox.style.display = 'block'; formBox.style.display = 'none'; }
 });
 
-window.login = () => {
-    loginError.innerText = "";
-    signInWithEmailAndPassword(auth, email.value.trim(), password.value)
- .catch(err => loginError.innerText = "Login Failed: " + err.message);
-}
+window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = "Login Failed: " + err.message); }
 window.logout = () => signOut(auth);
 window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
 
 function loadParts(){
     onValue(ref(db, 'tcs-parts-bizportal/categories'), (snapshot) => {
-        allPartsData = snapshot.val() || {};
-        filterParts(currentFilter);
+        allPartsData = snapshot.val() || {}; filterParts(currentFilter);
     }, (error) => { errorMsg.innerText = "DB Error: " + error.message });
 }
 
 window.filterParts = (filter) => {
     currentFilter = filter;
-    const list = document.getElementById('partsList'); list.innerHTML = '';
+    partsList.innerHTML = '';
     Object.keys(allPartsData).forEach(key => {
         const p = allPartsData[key];
         if(filter === 'available' && p.status === 'sold') return;
         if(filter === 'sold' && p.status!== 'sold') return;
-        list.innerHTML += `
+        partsList.innerHTML += `
         <div class="part-item">
             <img src="${p.image || 'https://via.placeholder.com/100'}">
-            <div style="flex:1;">
+            <div class="part-info">
                 <b>${p.year} ${p.make} ${p.model}</b> <span class="badge ${p.status}">${p.status || 'available'}</span><br>
-                ${p.partName} - R${p.price?.toLocaleString()}<br>
-                <button onclick='editPart("${key}")'>Edit</button>
-                ${p.status!=='sold'?`<button class="btn-sold" onclick='markSold("${key}")'>Mark SOLD</button>`:''}
+                <b>${p.partName}</b><br>
+                R${p.price?.toLocaleString()}<br>
+                <div class="btn-group">
+                  <button class="btn-edit" onclick='editPart("${key}")'>Edit</button>
+                  ${p.status!=='sold'?`<button class="btn-sold" onclick='markSold("${key}")'>Mark SOLD</button>`:''}
+                  <button class="btn-danger" onclick='deletePart("${key}")'>Delete</button>
+                </div>
             </div>
         </div>`;
     });
 }
 
 window.markSold = (id) => {
-    if(confirm("Mark as SOLD?")){
-        update(ref(db, `tcs-parts-bizportal/categories/${id}`), {
-            status: 'sold', dateSold: new Date().toISOString()
-        }).catch(err => errorMsg.innerText = "Error: " + err.message);
+    if(confirm("Mark this part as SOLD?")){
+        update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold', dateSold: new Date().toISOString()})
+       .catch(err => errorMsg.innerText = "Error: " + err.message);
+    }
+}
+
+window.deletePart = (id) => { // NEW DELETE FUNCTION
+    if(confirm("Are you sure you want to DELETE this part? This cannot be undone.")){
+        remove(ref(db, `tcs-parts-bizportal/categories/${id}`))
+       .then(()=> successMsg.innerText = "Part Deleted")
+       .catch(err => errorMsg.innerText = "Delete Error: " + err.message);
     }
 }
 
@@ -161,9 +166,7 @@ window.editPart = (id) => {
 
 window.savePart = async () => {
     errorMsg.innerText = ""; successMsg.innerText = "";
-    if(!make.value ||!model.value ||!year.value ||!partName.value ||!price.value){
-        errorMsg.innerText = "Please fill all required fields"; return;
-    }
+    if(!make.value ||!model.value ||!year.value ||!partName.value ||!price.value){ errorMsg.innerText = "Please fill all required fields"; return; }
 
     let partData = {
         make: make.value, model: model.value, year: year.value, partName: partName.value,
@@ -177,33 +180,20 @@ window.savePart = async () => {
             const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name);
             const snap = await uploadBytes(fileRef, imageFile);
             partData.image = await getDownloadURL(snap.ref);
-        } else if(editId.value) {
-            partData.image = preview.src;
-        } else {
-            errorMsg.innerText = "Please select an image"; return;
-        }
+        } else if(editId.value) { partData.image = preview.src; }
+        else { errorMsg.innerText = "Please select an image"; return; }
 
-        if(editId.value){
-            await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData);
-        } else {
-            // THIS PATH MATCHES YOUR RULES EXACTLY
-            await push(ref(db, 'tcs-parts-bizportal/categories'), partData);
-        }
+        if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); }
+        else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); }
 
-        successMsg.innerText = "Part Saved Successfully!";
-        resetForm();
-    } catch(err){
-        errorMsg.innerText = "SAVE FAILED: " + err.message;
-        console.error(err);
-    }
+        successMsg.innerText = "Part Saved Successfully!"; resetForm();
+    } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
 }
 
 window.resetForm = () => {
-    formTitle.innerText = "Add New Part";
-    editId.value = '';
+    formTitle.innerText = "Add New Part"; editId.value = '';
     document.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
-    preview.style.display = 'none';
-    imageFile = null;
+    preview.style.display = 'none'; imageFile = null;
 }
 </script>
 </body>
