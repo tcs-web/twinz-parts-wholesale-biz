@@ -6,73 +6,67 @@
 <title>Admin - TCS PARTS BIZPORTAL</title>
 <style>
     body{font-family:Arial;background:#f4f4f4;padding:20px;}
-   .container{max-width:600px;margin:auto;background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+  .container{max-width:1000px;margin:auto;background:white;padding:20px;border-radius:12px;}
     h2{color:#0A1A2F;text-align:center;}
-    input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
-    button{width:100%;padding:12px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;}
-    button:hover{background:#e67e00;}
-   .login-box{display:none;}
-   .form-box{display:none;}
-   .success{color:green;text-align:center;margin:10px 0;}
-   .preview-img{width:100%;height:200px;object-fit:cover;border-radius:8px;margin:10px 0;}
+    input,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
+    button{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
+  .btn-danger{background:#d32f2f;}.btn-edit{background:#1976d2;}.btn-sold{background:#4CAF50;}
+  .login-box{display:none;}.form-box{display:none;}
+  .success{color:green;text-align:center;}
+  .preview-img{width:100%;height:200px;object-fit:cover;border-radius:8px;margin:10px 0;}
+  .parts-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+  .part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
+  .part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;}
+  .sold-badge{background:red;color:white;padding:3px 8px;border-radius:4px;font-size:12px;}
 </style>
 </head>
 <body>
 
 <div class="container">
     <h2>TCS PARTS BIZPORTAL - Admin</h2>
-    
-    <!-- LOGIN BOX -->
+
     <div class="login-box" id="loginBox">
-        <h3>Login to Add Parts</h3>
+        <h3>Login to Manage Parts</h3>
         <input type="email" id="email" placeholder="ceo@tcspartsbizportal.co.za">
         <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
+        <button onclick="login()" style="width:100%;">Login</button>
         <p id="loginError" style="color:red;"></p>
     </div>
 
-    <!-- ADD PART FORM -->
     <div class="form-box" id="formBox">
-        <h3>Add New Part</h3>
+        <h3 id="formTitle">Add New Part</h3>
+        <input type="hidden" id="editId">
         <input type="text" id="make" placeholder="Make e.g Toyota" required>
         <input type="text" id="model" placeholder="Model e.g Hilux" required>
         <input type="number" id="year" placeholder="Year e.g 2020" required>
         <input type="text" id="partName" placeholder="Part Name e.g Alternator" required>
-        <input type="text" id="partCode" placeholder="Part Code e.g 27060-0L050">
+        <input type="text" id="partCode" placeholder="Part Code">
         <input type="number" id="price" placeholder="Price R e.g 3450" required>
-        
-        <select id="condition">
-            <option value="Used">Used</option>
-            <option value="New">New</option>
-            <option value="Refurb">Refurbished</option>
-        </select>
-
-        <select id="category">
-            <option value="used">Used Parts</option>
-            <option value="new">New Parts</option>
-            <option value="stripped">Stripped Vehicle</option>
-        </select>
-
-        <select id="vehicleType">
-            <option value="car">Car</option>
-            <option value="bakkie">Bakkie</option>
-            <option value="suv">SUV</option>
-        </select>
-
+        <select id="condition"><option>Used</option><option>New</option><option>Refurb</option></select>
+        <select id="category"><option value="used">Used Parts</option><option value="new">New Parts</option><option value="stripped">Stripped Vehicle</option></select>
+        <select id="vehicleType"><option value="car">Car</option><option value="bakkie">Bakkie</option><option value="suv">SUV</option></select>
         <input type="text" id="warranty" placeholder="Warranty e.g 90 Day Warranty">
         <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
         <img id="preview" class="preview-img" style="display:none;">
-        
-        <button onclick="addPart()">Upload Part to Firebase</button>
-        <button onclick="logout()" style="background:#666;margin-top:10px;">Logout</button>
+
+        <button onclick="savePart()">Save Part</button>
+        <button onclick="resetForm()" style="background:#666;">Cancel</button>
+        <button onclick="logout()" style="background:#333;width:100%;margin-top:10px;">Logout</button>
         <p id="successMsg" class="success"></p>
+
+        <hr>
+        <h3>Your Stock</h3>
+        <button onclick="showFilter('available')">Show Available</button>
+        <button onclick="showFilter('sold')">Show SOLD History</button>
+        <button onclick="showFilter('all')">Show All</button>
+        <div class="parts-list" id="partsList">Loading...</div>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -90,69 +84,85 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-let imageURL = "";
-let imageFile = null;
+let imageURL = ""; let imageFile = null; let allPartsData = {}; let currentFilter = 'available';
 
 onAuthStateChanged(auth, (user) => {
   if (user && (user.email === 'ceo@tcspartsbizportal.co.za' || user.email === 'manager@tcspartsbizportal.co.za')) {
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('formBox').style.display = 'block';
+    loadParts();
   } else {
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('formBox').style.display = 'none';
   }
 });
 
-window.login = function(){
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  signInWithEmailAndPassword(auth, email, password)
- .catch(err => document.getElementById('loginError').innerText = err.message);
+window.login = () => { signInWithEmailAndPassword(auth, email.value, password.value).catch(err => loginError.innerText = err.message); }
+window.logout = () => signOut(auth);
+window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
+
+function loadParts(){
+    onValue(ref(db, 'tcs-parts-bizportal/categories'), (snapshot) => {
+        allPartsData = snapshot.val() || {};
+        showFilter(currentFilter);
+    });
 }
 
-window.logout = function(){
-  signOut(auth);
+window.showFilter = (filter) => {
+    currentFilter = filter;
+    const list = document.getElementById('partsList'); list.innerHTML = '';
+    Object.keys(allPartsData).forEach(key => {
+        const p = allPartsData[key];
+        if(filter === 'available' && p.status === 'sold') return;
+        if(filter === 'sold' && p.status!== 'sold') return;
+
+        list.innerHTML += `
+        <div class="part-item">
+            <img src="${p.image}">
+            <div style="flex:1;">
+                <b>${p.year} ${p.make} ${p.model}</b> ${p.status==='sold'?'<span class="sold-badge">SOLD</span>':''}<br>
+                ${p.partName} - R${p.price?.toLocaleString()}<br>
+                <button class="btn-edit" onclick='editPart("${key}")'>Edit</button>
+                ${p.status!=='sold'?`<button class="btn-sold" onclick='markSold("${key}")'>Mark SOLD</button>`:''}
+            </div>
+        </div>`;
+    });
 }
 
-window.previewImage = function(event){
-    imageFile = event.target.files[0];
-    document.getElementById('preview').src = URL.createObjectURL(imageFile);
-    document.getElementById('preview').style.display = 'block';
+// MARK AS SOLD - SAVES TO FIREBASE
+window.markSold = (id) => {
+    if(confirm("Mark this part as SOLD? It will be removed from public site.")){
+        update(ref(db, 'tcs-parts-bizportal/categories/' + id), {
+            status: 'sold',
+            dateSold: new Date().toISOString()
+        });
+    }
 }
 
-window.addPart = async function(){
-    if(!imageFile){ alert("Please select an image"); return; }
-    
-    // 1. Upload image to Firebase Storage
-    const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name);
-    const snap = await uploadBytes(fileRef, imageFile);
-    imageURL = await getDownloadURL(snap.ref);
+window.editPart = (id) => {
+    const p = allPartsData[id]; formTitle.innerText = "Edit Part"; editId.value = id;
+    ['make','model','year','partName','partCode','price','condition','category','vehicleType','warranty'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k]; });
+    preview.src = p.image; preview.style.display = 'block'; window.scrollTo(0,0);
+}
 
-    // 2. Save part data to Realtime Database
-    const partData = {
-        make: document.getElementById('make').value,
-        model: document.getElementById('model').value,
-        year: document.getElementById('year').value,
-        partName: document.getElementById('partName').value,
-        partCode: document.getElementById('partCode').value,
-        price: Number(document.getElementById('price').value),
-        condition: document.getElementById('condition').value,
-        category: document.getElementById('category').value,
-        vehicleType: document.getElementById('vehicleType').value,
-        warranty: document.getElementById('warranty').value,
-        location: "Burgersfort",
-        image: imageURL,
+window.savePart = async () => {
+    let partData = {
+        make: make.value, model: model.value, year: year.value, partName: partName.value,
+        partCode: partCode.value, price: Number(price.value), condition: condition.value,
+        category: category.value, vehicleType: vehicleType.value, warranty: warranty.value,
+        location: "Burgersfort", status: 'available', // NEW PARTS ARE AVAILABLE
         dateAdded: new Date().toISOString()
     };
+    if(imageFile){ const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name); const snap = await uploadBytes(fileRef, imageFile); partData.image = await getDownloadURL(snap.ref); }
+    else if(editId.value) { partData.image = preview.src; }
 
-    push(ref(db, 'tcs-parts-bizportal/categories'), partData);
-    
-    document.getElementById('successMsg').innerText = "Part Added Successfully!";
-    document.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
-    document.getElementById('preview').style.display = 'none';
-    setTimeout(()=>document.getElementById('successMsg').innerText='', 3000);
+    if(editId.value){ update(ref(db, 'tcs-parts-bizportal/categories/' + editId.value), partData); }
+    else { push(ref(db, 'tcs-parts-bizportal/categories'), partData); }
+
+    successMsg.innerText = "Part Saved!"; resetForm(); setTimeout(()=>successMsg.innerText='', 3000);
 }
-</script>
 
+window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; document.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = ''); preview.style.display = 'none'; imageFile = null; }
+</script>
 </body>
 </html>
