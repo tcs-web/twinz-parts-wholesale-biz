@@ -3,127 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Twinz Cooperate Services - Car Parts | All Makes & Models</title>
+<title>Admin - TCS PARTS BIZPORTAL</title>
 <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
-    body{background:#f4f4f4;color:#333;}
-    header{background:#0A1A2F;color:white;padding:15px;}
-    .logo{font-size:22px;font-weight:bold;color:#FF8C00;}
-    .search-bar{display:flex;margin:15px 0;gap:10px;}
-    .search-bar input{flex:1;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px;}
-    .search-bar button{padding:12px 20px;background:#FF8C00;color:white;border:none;border-radius:8px;cursor:pointer;}
-    .tabs{display:flex;gap:10px;margin:10px 0;}
-    .tab{padding:10px 15px;background:#fff;border-radius:8px;cursor:pointer;font-weight:bold;}
-    .tab.active{background:#FF8C00;color:white;}
-    .filters{display:flex;justify-content:space-between;padding:10px;background:white;margin:10px 0;border-radius:8px;}
-    .parts-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:15px;padding:10px;}
-    .part-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-    .part-card img{width:100%;height:180px;object-fit:cover;}
-    .part-info{padding:12px;}
-    .part-title{font-weight:bold;font-size:16px;margin-bottom:5px;}
-    .part-meta{font-size:13px;color:#666;margin:5px 0;}
-    .price{color:#FF8C00;font-size:20px;font-weight:bold;}
-    .btn{padding:8px 12px;background:#0A1A2F;color:white;border:none;border-radius:6px;margin-top:8px;cursor:pointer;width:100%;}
-    footer{background:#0A1A2F;color:white;padding:20px;margin-top:30px;font-size:14px;}
-    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+    body{font-family:Arial;background:#f4f4f4;padding:20px;}
+   .container{max-width:600px;margin:auto;background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    h2{color:#0A1A2F;text-align:center;}
+    input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
+    button{width:100%;padding:12px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:16px;}
+    button:hover{background:#e67e00;}
+   .login-box{display:none;}
+   .form-box{display:none;}
+   .success{color:green;text-align:center;margin:10px 0;}
+   .preview-img{width:100%;height:200px;object-fit:cover;border-radius:8px;margin:10px 0;}
 </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">TWINZ COOPERATE SERVICES</div>
-    <div>All Makes, All Models, All Years | Car Parts Specialists</div>
+<div class="container">
+    <h2>TCS PARTS BIZPORTAL - Admin</h2>
     
-    <div class="search-bar">
-        <input type="text" id="search" placeholder="Search Make, Model, Year, Part... e.g 2020 Hilux Alternator">
-        <button onclick="searchParts()">🔍 Search</button>
+    <!-- LOGIN BOX -->
+    <div class="login-box" id="loginBox">
+        <h3>Login to Add Parts</h3>
+        <input type="email" id="email" placeholder="ceo@tcspartsbizportal.co.za">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="loginError" style="color:red;"></p>
     </div>
 
-    <div class="tabs">
-        <div class="tab active">All</div>
-        <div class="tab">New Parts</div>
-        <div class="tab">Used Parts</div>
-        <div class="tab">Stripped Vehicles</div>
-    </div>
+    <!-- ADD PART FORM -->
+    <div class="form-box" id="formBox">
+        <h3>Add New Part</h3>
+        <input type="text" id="make" placeholder="Make e.g Toyota" required>
+        <input type="text" id="model" placeholder="Model e.g Hilux" required>
+        <input type="number" id="year" placeholder="Year e.g 2020" required>
+        <input type="text" id="partName" placeholder="Part Name e.g Alternator" required>
+        <input type="text" id="partCode" placeholder="Part Code e.g 27060-0L050">
+        <input type="number" id="price" placeholder="Price R e.g 3450" required>
+        
+        <select id="condition">
+            <option value="Used">Used</option>
+            <option value="New">New</option>
+            <option value="Refurb">Refurbished</option>
+        </select>
 
-    <div style="display:flex;gap:10px;">
-        <button class="tab">🚗 Car</button>
-        <button class="tab">🚙 Bakkie</button>
-        <button class="tab">🚘 SUV</button>
-    </div>
-</header>
+        <select id="category">
+            <option value="used">Used Parts</option>
+            <option value="new">New Parts</option>
+            <option value="stripped">Stripped Vehicle</option>
+        </select>
 
-<div class="filters">
-    <div><b>FILTER AND SORT</b> ▼</div>
-    <div><b>SORT</b> ≡</div>
+        <select id="vehicleType">
+            <option value="car">Car</option>
+            <option value="bakkie">Bakkie</option>
+            <option value="suv">SUV</option>
+        </select>
+
+        <input type="text" id="warranty" placeholder="Warranty e.g 90 Day Warranty">
+        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+        <img id="preview" class="preview-img" style="display:none;">
+        
+        <button onclick="addPart()">Upload Part to Firebase</button>
+        <button onclick="logout()" style="background:#666;margin-top:10px;">Logout</button>
+        <p id="successMsg" class="success"></p>
+    </div>
 </div>
 
-<div id="partsCount" style="padding:10px;"><b>234 Parts in Stock</b></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-<div class="parts-grid" id="partsGrid">
-    <!-- SAMPLE PART 1 -->
-    <div class="part-card">
-        <img src="https://via.placeholder.com/300x180?text=Alternator+Photo" alt="Alternator">
-        <div class="part-info">
-            <div class="part-title">2020 Toyota Hilux 2.4 GD6 Alternator</div>
-            <div class="part-meta">Used | Tested | 90 Day Warranty</div>
-            <div class="part-meta">📍 Burgersfort | Part: 27060-0L050</div>
-            <div class="price">R 3 450</div>
-            <button class="btn" onclick="whatsapp('Hilux Alternator R3450')">WhatsApp Us</button>
-        </div>
-    </div>
+const firebaseConfig = {
+  apiKey: "AIzaSyCkZXuJJ67POe1YLogqDEThuVk-84rnjIU",
+  authDomain: "tcs-parts-bizportal.firebaseapp.com",
+  databaseURL: "https://tcs-parts-bizportal-default-rtdb.firebaseio.com/",
+  projectId: "tcs-parts-bizportal",
+  storageBucket: "tcs-parts-bizportal.firebasestorage.app",
+  messagingSenderId: "472208411435",
+  appId: "1:472208411435:web:dae65a8b07ddd8a55f136e"
+};
 
-    <!-- SAMPLE PART 2 -->
-    <div class="part-card">
-        <img src="https://via.placeholder.com/300x180?text=Headlight+Photo" alt="Headlight">
-        <div class="part-info">
-            <div class="part-title">2019 VW Polo 1.0 TSI Left Headlight</div>
-            <div class="part-meta">Used | Good Condition</div>
-            <div class="part-meta">📍 Burgersfort | Part: 6R1-941-753</div>
-            <div class="price">R 1 850</div>
-            <button class="btn" onclick="whatsapp('Polo Headlight R1850')">WhatsApp Us</button>
-        </div>
-    </div>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-    <!-- ADD MORE PARTS HERE -->
-</div>
+let imageURL = "";
+let imageFile = null;
 
-<footer>
-    <h3>Twinz Cooperate Services Pty Ltd</h3>
-    <div class="contact-grid">
-        <div>
-            <b>Address:</b><br>
-            Burgersfort Praktiseer Ext 02<br>
-            Stand no 3211
-        </div>
-        <div>
-            <b>Contact:</b><br>
-            068 254 7352<br>
-            069 894 9596<br>
-            <b>Email:</b> twinz.cooperate.services@gmail.com
-        </div>
-        <div>
-            <b>Banking Details:</b><br>
-            Bank: Standard Bank<br>
-            Account: 10 26 459 443 4<br>
-            Branch Code: 006145
-        </div>
-        <div>
-            <b>Business Hours:</b><br>
-            Mon - Sat: 8am - 5pm<br>
-            Nationwide Delivery Available
-        </div>
-    </div>
-    <p style="text-align:center;margin-top:15px;">© 2026 Twinz Cooperate Services. All Rights Reserved.</p>
-</footer>
+onAuthStateChanged(auth, (user) => {
+  if (user && (user.email === 'ceo@tcspartsbizportal.co.za' || user.email === 'manager@tcspartsbizportal.co.za')) {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('formBox').style.display = 'block';
+  } else {
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('formBox').style.display = 'none';
+  }
+});
 
-<script>
-function searchParts(){
-    alert("Search feature coming next! For now scroll and use WhatsApp to enquire.");
+window.login = function(){
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  signInWithEmailAndPassword(auth, email, password)
+ .catch(err => document.getElementById('loginError').innerText = err.message);
 }
-function whatsapp(item){
-    let msg = "Hi Twinz Cooperate Services, I am interested in: " + item;
-    window.open("https://wa.me/27682547352?text=" + encodeURIComponent(msg));
+
+window.logout = function(){
+  signOut(auth);
+}
+
+window.previewImage = function(event){
+    imageFile = event.target.files[0];
+    document.getElementById('preview').src = URL.createObjectURL(imageFile);
+    document.getElementById('preview').style.display = 'block';
+}
+
+window.addPart = async function(){
+    if(!imageFile){ alert("Please select an image"); return; }
+    
+    // 1. Upload image to Firebase Storage
+    const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name);
+    const snap = await uploadBytes(fileRef, imageFile);
+    imageURL = await getDownloadURL(snap.ref);
+
+    // 2. Save part data to Realtime Database
+    const partData = {
+        make: document.getElementById('make').value,
+        model: document.getElementById('model').value,
+        year: document.getElementById('year').value,
+        partName: document.getElementById('partName').value,
+        partCode: document.getElementById('partCode').value,
+        price: Number(document.getElementById('price').value),
+        condition: document.getElementById('condition').value,
+        category: document.getElementById('category').value,
+        vehicleType: document.getElementById('vehicleType').value,
+        warranty: document.getElementById('warranty').value,
+        location: "Burgersfort",
+        image: imageURL,
+        dateAdded: new Date().toISOString()
+    };
+
+    push(ref(db, 'tcs-parts-bizportal/categories'), partData);
+    
+    document.getElementById('successMsg').innerText = "Part Added Successfully!";
+    document.querySelectorAll('input[type=text], input[type=number]').forEach(i => i.value = '');
+    document.getElementById('preview').style.display = 'none';
+    setTimeout(()=>document.getElementById('successMsg').innerText='', 3000);
 }
 </script>
 
