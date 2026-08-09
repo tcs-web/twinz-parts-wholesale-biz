@@ -1,1 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twinz Cooperate Services - Car Parts | All Makes & Models</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+    body{background:#f4f4f4;color:#333;}
+    header{background:#0A1A2F;color:white;padding:15px;}
+    .logo{font-size:22px;font-weight:bold;color:#FF8C00;}
+    .search-bar{display:flex;margin:15px 0;gap:10px;}
+    .search-bar input{flex:1;padding:12px;border-radius:8px;border:1px solid #ccc;font-size:16px;}
+    .search-bar button{padding:12px 20px;background:#FF8C00;color:white;border:none;border-radius:8px;cursor:pointer;}
+    .tabs{display:flex;gap:10px;margin:10px 0;}
+    .tab{padding:10px 15px;background:#fff;border-radius:8px;cursor:pointer;font-weight:bold;}
+    .tab.active{background:#FF8C00;color:white;}
+    .filters{display:flex;justify-content:space-between;padding:10px;background:white;margin:10px 0;border-radius:8px;}
+    .parts-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:15px;padding:10px;}
+    .part-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+    .part-card img{width:100%;height:180px;object-fit:cover;}
+    .part-info{padding:12px;}
+    .part-title{font-weight:bold;font-size:16px;margin-bottom:5px;}
+    .part-meta{font-size:13px;color:#666;margin:5px 0;}
+    .price{color:#FF8C00;font-size:20px;font-weight:bold;}
+    .btn{padding:8px 12px;background:#0A1A2F;color:white;border:none;border-radius:6px;margin-top:8px;cursor:pointer;width:100%;}
+    footer{background:#0A1A2F;color:white;padding:20px;margin-top:30px;font-size:14px;}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+</style>
+</head>
+<body>
 
+<header>
+    <div class="logo">TWINZ COOPERATE SERVICES</div>
+    <div>All Makes, All Models, All Years | Car Parts Specialists</div>
+    
+    <div class="search-bar">
+        <input type="text" id="search" placeholder="Search Make, Model, Year, Part... e.g 2020 Hilux Alternator">
+        <button onclick="searchParts()">🔍 Search</button>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active">All</div>
+        <div class="tab">New Parts</div>
+        <div class="tab">Used Parts</div>
+        <div class="tab">Stripped Vehicles</div>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+        <button class="tab">🚗 Car</button>
+        <button class="tab">🚙 Bakkie</button>
+        <button class="tab">🚘 SUV</button>
+    </div>
+</header>
+
+<div class="filters">
+    <div><b>FILTER AND SORT</b> ▼</div>
+    <div><b>SORT</b> ≡</div>
+</div>
+
+<div id="partsCount" style="padding:10px;"><b>234 Parts in Stock</b></div>
+
+<div class="parts-grid" id="partsGrid">
+    <!-- SAMPLE PART 1 -->
+    <div class="part-card">
+        <img src="https://via.placeholder.com/300x180?text=Alternator+Photo" alt="Alternator">
+        <div class="part-info">
+            <div class="part-title">2020 Toyota Hilux 2.4 GD6 Alternator</div>
+            <div class="part-meta">Used | Tested | 90 Day Warranty</div>
+            <div class="part-meta">📍 Burgersfort | Part: 27060-0L050</div>
+            <div class="price">R 3 450</div>
+            <button class="btn" onclick="whatsapp('Hilux Alternator R3450')">WhatsApp Us</button>
+        </div>
+    </div>
+
+    <!-- SAMPLE PART 2 -->
+    <div class="part-card">
+        <img src="https://via.placeholder.com/300x180?text=Headlight+Photo" alt="Headlight">
+        <div class="part-info">
+            <div class="part-title">2019 VW Polo 1.0 TSI Left Headlight</div>
+            <div class="part-meta">Used | Good Condition</div>
+            <div class="part-meta">📍 Burgersfort | Part: 6R1-941-753</div>
+            <div class="price">R 1 850</div>
+            <button class="btn" onclick="whatsapp('Polo Headlight R1850')">WhatsApp Us</button>
+        </div>
+    </div>
+
+    <!-- ADD MORE PARTS HERE -->
+</div>
+
+<footer>
+    <h3>Twinz Cooperate Services Pty Ltd</h3>
+    <div class="contact-grid">
+        <div>
+            <b>Address:</b><br>
+            Burgersfort Praktiseer Ext 02<br>
+            Stand no 3211
+        </div>
+        <div>
+            <b>Contact:</b><br>
+            068 254 7352<br>
+            069 894 9596<br>
+            <b>Email:</b> twinz.cooperate.services@gmail.com
+        </div>
+        <div>
+            <b>Banking Details:</b><br>
+            Bank: Standard Bank<br>
+            Account: 10 26 459 443 4<br>
+            Branch Code: 006145
+        </div>
+        <div>
+            <b>Business Hours:</b><br>
+            Mon - Sat: 8am - 5pm<br>
+            Nationwide Delivery Available
+        </div>
+    </div>
+    <p style="text-align:center;margin-top:15px;">© 2026 Twinz Cooperate Services. All Rights Reserved.</p>
+</footer>
+
+<script>
+function searchParts(){
+    alert("Search feature coming next! For now scroll and use WhatsApp to enquire.");
+}
+function whatsapp(item){
+    let msg = "Hi Twinz Cooperate Services, I am interested in: " + item;
+    window.open("https://wa.me/27682547352?text=" + encodeURIComponent(msg));
+}
+</script>
+
+</body>
+</html>
