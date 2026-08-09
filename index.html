@@ -3,45 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TWINZ BIZPORTAL</title>
+<title>TCS PARTS BIZPORTAL</title>
 <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;}
-    body{background:#f5f7fa;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-    
+    body{background:#f5f7fa;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;}
+
     /* LOGIN CARD */
-  .login-container{background:white;width:100%;max-width:400px;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;}
-  .logo-img{width:90px;height:90px;border-radius:20px;object-fit:cover;margin-bottom:15px;box-shadow:0 4px 15px rgba(10,26,47,0.2);}
-    h1{color:#0066CC;font-size:24px;font-weight:800;margin-bottom:25px;}
+ .login-container{background:white;width:100%;max-width:400px;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;}
+ .logo-img{width:90px;height:90px;border-radius:20px;object-fit:cover;margin-bottom:15px;}
+    h1{color:#0A1A2F;font-size:22px;font-weight:800;margin-bottom:25px;}
     input{width:100%;padding:14px;margin:8px 0;border:1px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;}
-    input:focus{outline:none;border-color:#0066CC;background:white;}
-  .btn-login{width:100%;padding:14px;background:#0066CC;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
-  .btn-login:hover{background:#004A99;}
-   .error{color:red;text-align:center;font-size:14px;margin-top:10px;font-weight:bold;}
+    input:focus{outline:none;border-color:#0A1A2F;background:white;}
+ .btn-login{width:100%;padding:14px;background:#FF8C00;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
+ .btn-login:hover{background:#e67e00;}
+  .error{color:red;text-align:center;font-size:14px;margin-top:10px;font-weight:bold;}
 
     /* MAIN APP */
-   .container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;display:none;}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
-  .header-logo{display:flex;align-items:center;gap:10px;}
-  .header-logo img{width:40px;height:40px;border-radius:10px;}
-  .header-logo h2{color:#0A1A2F;font-size:18px;}
-  .badge-ceo{background:#8B5CF6;color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
-  .btn-logout{background:#d32f2f;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;}
+  .container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;display:none;width:100%;}
+ .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
+ .header-logo{display:flex;align-items:center;gap:10px;}
+ .header-logo img{width:40px;height:40px;border-radius:10px;}
+ .header-logo h2{color:#0A1A2F;font-size:16px;}
+ .badge-ceo{background:#8B5CF6;color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+ .btn-logout{background:#d32f2f;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;}
 
-  .banner{background:linear-gradient(135deg,#0A1A2F,#0066CC);color:white;padding:15px;border-radius:12px;text-align:center;margin-bottom:15px;}
-  .tabs{display:flex;border-bottom:2px solid #ddd;margin:15px 0;overflow-x:auto;}
-  .tab{padding:12px 20px;font-weight:bold;cursor:pointer;color:#555;white-space:nowrap;}
-  .tab.active{color:#0066CC;border-bottom:3px solid #FF8C00;}
-  .tab-content{display:none;}.tab-content.active{display:block;}
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:15px 0;}
-  .stat-card{background:linear-gradient(135deg,#0A1A2F,#0066CC);color:white;padding:20px;border-radius:12px;text-align:center;}
-  .stat-card h1{margin:0;font-size:28px;}
-  .info-box{background:#e3f2fd;border-left:4px solid #0066CC;padding:12px;border-radius:8px;margin:15px 0;font-size:14px;}
-  .btn{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
-  .btn-blue{background:#0066CC;}.btn-green{background:#25D366;}.btn-red{background:#d32f2f;}.btn-purple{background:#8B5CF6;}
-  .parts-list{display:grid;grid-template-columns:1fr;gap:12px;}
-  .part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
-  .part-item img{width:100px;height:100px;object-fit:cover;border-radius:6px;}
-    table{width:100%;border-collapse:collapse;} table th,table td{border:1px solid #ddd;padding:8px;}
+ .banner{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:15px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold;}
+ .tabs{display:flex;border-bottom:2px solid #ddd;margin:15px 0;overflow-x:auto;}
+ .tab{padding:12px 16px;font-weight:bold;cursor:pointer;color:#555;white-space:nowrap;font-size:14px;}
+ .tab.active{color:#0A1A2F;border-bottom:3px solid #FF8C00;}
+ .tab-content{display:none;}.tab-content.active{display:block;}
+ .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:15px 0;}
+ .stat-card{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:20px;border-radius:12px;text-align:center;}
+ .stat-card h1{margin:0;font-size:28px;}
+ .info-box{background:#e3f2fd;border-left:4px solid #0A1A2F;padding:12px;border-radius:8px;margin:15px 0;font-size:14px;}
+ .share-box{background:#e3f2fd;padding:15px;border-radius:12px;margin:15px 0;}
+ .copy-group{display:flex;gap:8px;flex-wrap:wrap;}
+ .copy-group input{flex:1;min-width:200px;}
+ .btn{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
+ .btn-blue{background:#0A1A2F;}.btn-green{background:#25D366;}.btn-red{background:#d32f2f;}.btn-purple{background:#8B5CF6;}
+ .parts-list{display:grid;grid-template-columns:1fr;gap:12px;}
+ .part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
+ .part-item img{width:90px;height:90px;object-fit:cover;border-radius:6px;}
+  .table-wrapper{overflow-x:auto;} /* FIX FOR MOBILE TABLE */
+    table{width:100%;border-collapse:collapse;min-width:600px;}
+    table th,table td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px;}
     table th{background:#0A1A2F;color:white;}
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 </style>
@@ -50,9 +55,9 @@
 
 <!-- LOGIN SCREEN -->
 <div class="login-container" id="loginBox">
-    <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png" alt="TWINZ Logo" class="logo-img">
-    <h1>TWINZ BIZPORTAL</h1>
-    <input type="email" id="email" placeholder="Email">
+    <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png" alt="TCS Logo" class="logo-img">
+    <h1>TCS PARTS BIZPORTAL</h1>
+    <input type="email" id="email" placeholder="ceo@tcspartsbizportal.co.za">
     <input type="password" id="password" placeholder="Password">
     <button class="btn-login" onclick="login()">Login</button>
     <p id="loginError" class="error"></p>
@@ -63,24 +68,25 @@
     <div class="header">
         <div class="header-logo">
             <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png">
-            <h2>TWINZ BIZPORTAL</h2>
+            <h2>TCS PARTS BIZPORTAL</h2>
         </div>
         <span class="badge-ceo">CEO</span>
         <button class="btn-logout" onclick="logout()">Logout</button>
     </div>
 
-    <div class="banner"><h3>💼 BUSINESS SOLUTIONS & SERVICES 💼</h3></div>
+    <div class="banner">💼 BUSINESS SOLUTIONS & SERVICES 💼</div>
 
     <div class="tabs">
-        <div class="tab active" onclick="openTab('dashboard')">Dashboard</div>
-        <div class="tab" onclick="openTab('requests')">Requests</div>
+        <div class="tab" onclick="openTab('dashboard')">Dashboard</div>
+        <div class="tab active" onclick="openTab('requests')">Requests</div>
         <div class="tab" onclick="openTab('vin')">VIN Decoder</div>
         <div class="tab" onclick="openTab('services')">Add Part</div>
         <div class="tab" onclick="openTab('stock')">Stock</div>
         <div class="tab" onclick="openTab('reports')">Reports</div>
     </div>
 
-    <div id="dashboard" class="tab-content active">
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="tab-content">
         <h3>📊 Dashboard</h3>
         <div class="stats-grid">
             <div class="stat-card"><h1 id="totalParts">0</h1><p>Total Parts</p></div>
@@ -91,18 +97,40 @@
             🏦 <b>Business Account:</b> Standard Bank 10264594434 | Branch: 006145<br>
             📱 <b>Orders WhatsApp:</b> 0682547352 | 0698949596
         </div>
-        <div class="info-box">
+        <div class="share-box">
             <h4>📱 Share Customer Service Link</h4>
-            <input type="text" id="customerLink" value="https://tcs-parts-bizportal.web.app/customer.html" readonly style="width:70%;">
-            <button class="btn btn-blue" onclick="copyLink()">Copy</button>
-            <button class="btn btn-green" onclick="shareWhatsApp()">WhatsApp</button>
+            <p>Customers use this link to request parts</p>
+            <div class="copy-group">
+                <input type="text" id="customerLink" value="https://tcs-web.github.io/twinz-p/customer.html" readonly>
+                <button class="btn btn-blue" onclick="copyLink()">Copy</button>
+            </div>
+            <button class="btn btn-green" onclick="shareWhatsApp()">Send via WhatsApp</button>
         </div>
     </div>
 
-    <div id="requests" class="tab-content"><h3>📥 Customer Requests</h3><table id="requestsTable"><thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Part</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    <!-- REQUESTS -->
+    <div id="requests" class="tab-content active">
+        <h3>📥 Customer Requests</h3>
+        <div class="table-wrapper">
+            <table id="requestsTable">
+                <thead>
+                    <tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody><tr><td colspan="7">Loading requests...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- VIN -->
     <div id="vin" class="tab-content"><h3>🚗 VIN Decoder</h3><input type="text" id="vinInput" placeholder="Enter 17 Digit VIN"><button class="btn" onclick="decodeVIN()">Decode</button><div id="vinResult"></div></div>
+
+    <!-- ADD PART -->
     <div id="services" class="tab-content"><h3 id="formTitle">Add New Part</h3><input id="make" placeholder="Make"><input id="model" placeholder="Model"><input id="year" placeholder="Year"><input id="partName" placeholder="Part Name"><input id="price" placeholder="Price R"><input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)"><img id="preview" style="max-width:100%;display:none;"><button class="btn" onclick="savePart()">Save Part</button><p id="successMsg" style="color:green;"></p><p id="errorMsg" style="color:red;"></p></div>
+
+    <!-- STOCK -->
     <div id="stock" class="tab-content"><h3>📦 Stock</h3><button class="btn" onclick="filterParts('available')">Available</button><button class="btn" onclick="filterParts('sold')">Sold</button><div class="parts-list" id="partsList"></div></div>
+
+    <!-- REPORTS -->
     <div id="reports" class="tab-content"><h3>📑 Reports</h3><button class="btn btn-purple" onclick="downloadCSV()">Download CSV</button><button class="btn btn-red" onclick="downloadPDF()">Download PDF</button></div>
 </div>
 
@@ -129,6 +157,7 @@ const db = getDatabase(app);
 const storage = getStorage(app);
 let imageFile = null; let allPartsData = {}; let allRequestsData = {};
 
+// TABS
 window.openTab = (tabName) => {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -138,36 +167,59 @@ window.openTab = (tabName) => {
 
 onAuthStateChanged(auth, (user) => {
   if (user && ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'].includes(user.email)) {
-    loginBox.style.display = 'none'; 
+    loginBox.style.display = 'none';
     formBox.style.display = 'block';
     loadData();
-  } else { 
-    loginBox.style.display = 'block'; 
-    formBox.style.display = 'none'; 
+  } else {
+    loginBox.style.display = 'block';
+    formBox.style.display = 'none';
   }
 });
 
-window.login = () => { 
-    loginError.innerText = ""; 
+window.login = () => {
+    loginError.innerText = "";
     signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value)
-   .catch(err => loginError.innerText = "Login Failed: " + err.message); 
+  .catch(err => loginError.innerText = "Login Failed: " + err.message);
 }
 window.logout = () => signOut(auth);
 window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
-window.copyLink = () => { navigator.clipboard.writeText(customerLink.value); alert("Link Copied!"); }
-window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('Request car parts here: '+customerLink.value)}`, '_blank'); }
+window.copyLink = () => { navigator.clipboard.writeText(customerLink.value); alert("Customer Link Copied!"); }
+window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('Request TCS Parts here: '+customerLink.value)}`, '_blank'); }
 
+// CONNECTED TO CLIENT LINK - READS FROM FIREBASE
 function loadData(){
     onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{allPartsData=s.val()||{};totalParts.innerText=Object.keys(allPartsData).length;filterParts('available');});
-    onValue(ref(db, 'tcs-parts-bizportal/requests'), s=>{allRequestsData=s.val()||{};let reqs=Object.entries(allRequestsData);totalRequests.innerText=reqs.length;pendingRequests.innerText=reqs.filter(([k,v])=>v.status==='pending').length;requestsTable.querySelector('tbody').innerHTML=reqs.map(([k,v])=>`<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.part}</td><td>${v.status}</td><td><button class="btn btn-green" onclick="markDone('${k}')">Done</button></td></tr>`).join('');});
+
+    // THIS IS THE CLIENT LINK CONNECTION
+    onValue(ref(db, 'tcs-parts-bizportal/requests'), s=>{
+        allRequestsData=s.val()||{};
+        let reqs=Object.entries(allRequestsData);
+        totalRequests.innerText=reqs.length;
+        pendingRequests.innerText=reqs.filter(([k,v])=>v.status==='pending').length;
+
+        let tbody = '';
+        reqs.reverse().forEach(([k,v])=>{
+            tbody += `<tr>
+                <td>${v.date}</td>
+                <td>${v.name}</td>
+                <td>${v.phone}</td>
+                <td>${v.vehicle||'-'}</td>
+                <td>${v.part}</td>
+                <td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td>
+                <td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button></td>
+            </tr>`;
+        });
+        requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
+    });
 }
+
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
-window.downloadCSV = () => {let csv='Year,Make,Model,Part,Price\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.partName},${p.price}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='report.csv';a.click();}
-window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TWINZ STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("report.pdf");}
-window.filterParts = (f)=>{partsList.innerHTML='';Object.entries(allPartsData).forEach(([k,p])=>{if(f==='available'&&p.status==='sold')return;if(f==='sold'&&p.status!=='sold')return;partsList.innerHTML+=`<div class="part-item"><img src="${p.image}"><div><b>${p.year} ${p.make}</b><br>${p.partName}<br>R${p.price}<br><button class="btn btn-red" onclick="deletePart('${k}')">Delete</button></div></div>`;});}
-window.deletePart = (id) => { if(confirm("DELETE?")) remove(ref(db, `tcs-parts-bizportal/categories/${id}`)); }
-window.savePart = async () => { /* same save function */ }
+window.downloadCSV = () => {let csv='Year,Make,Model,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
+window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
+window.filterParts = (f)=>{partsList.innerHTML='';Object.entries(allPartsData).forEach(([k,p])=>{if(f==='available'&&p.status==='sold')return;if(f==='sold'&&p.status!=='sold')return;partsList.innerHTML+=`<div class="part-item"><img src="${p.image||'https://via.placeholder.com/90'}"><div><b>${p.year} ${p.make} ${p.model}</b><br>${p.partName}<br>R${p.price}<br><button class="btn btn-red" onclick="deletePart('${k}')">Delete</button></div></div>`;});}
+window.deletePart = (id) => { if(confirm("DELETE this part?")) remove(ref(db, `tcs-parts-bizportal/categories/${id}`)); }
+window.savePart = async () => { /* your save function */ }
 </script>
 </body>
 </html>
