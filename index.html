@@ -7,53 +7,49 @@
 <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;}
     body{background:#f5f7fa;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;}
-
-    /* LOGIN CARD */
- .login-container{background:white;width:100%;max-width:400px;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;}
- .logo-img{width:90px;height:90px;border-radius:20px;object-fit:cover;margin-bottom:15px;}
+.login-container{background:white;width:100%;max-width:400px;border-radius:20px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;}
+.logo-img{width:90px;height:90px;border-radius:20px;object-fit:cover;margin-bottom:15px;}
     h1{color:#0A1A2F;font-size:22px;font-weight:800;margin-bottom:25px;}
     input{width:100%;padding:14px;margin:8px 0;border:1px solid #e0e0e0;border-radius:10px;font-size:15px;background:#fafafa;}
-    input:focus{outline:none;border-color:#0A1A2F;background:white;}
- .btn-login{width:100%;padding:14px;background:#FF8C00;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
- .btn-login:hover{background:#e67e00;}
-  .error{color:red;text-align:center;font-size:14px;margin-top:10px;font-weight:bold;}
-
-    /* MAIN APP */
-  .container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;display:none;width:100%;}
- .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
- .header-logo{display:flex;align-items:center;gap:10px;}
- .header-logo img{width:40px;height:40px;border-radius:10px;}
- .header-logo h2{color:#0A1A2F;font-size:16px;}
- .badge-ceo{background:#8B5CF6;color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
- .btn-logout{background:#d32f2f;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;}
-
- .banner{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:15px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold;}
- .tabs{display:flex;border-bottom:2px solid #ddd;margin:15px 0;overflow-x:auto;}
- .tab{padding:12px 16px;font-weight:bold;cursor:pointer;color:#555;white-space:nowrap;font-size:14px;}
- .tab.active{color:#0A1A2F;border-bottom:3px solid #FF8C00;}
- .tab-content{display:none;}.tab-content.active{display:block;}
- .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:15px 0;}
- .stat-card{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:20px;border-radius:12px;text-align:center;}
- .stat-card h1{margin:0;font-size:28px;}
- .info-box{background:#e3f2fd;border-left:4px solid #0A1A2F;padding:12px;border-radius:8px;margin:15px 0;font-size:14px;}
- .share-box{background:#e3f2fd;padding:15px;border-radius:12px;margin:15px 0;}
- .copy-group{display:flex;gap:8px;flex-wrap:wrap;}
- .copy-group input{flex:1;min-width:200px;}
- .btn{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;}
- .btn-blue{background:#0A1A2F;}.btn-green{background:#25D366;}.btn-red{background:#d32f2f;}.btn-purple{background:#8B5CF6;}
- .parts-list{display:grid;grid-template-columns:1fr;gap:12px;}
- .part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
- .part-item img{width:90px;height:90px;object-fit:cover;border-radius:6px;}
-  .table-wrapper{overflow-x:auto;} /* FIX FOR MOBILE TABLE */
+.btn-login{width:100%;padding:14px;background:#FF8C00;color:white;border:none;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px;}
+.error{color:red;text-align:center;font-size:14px;margin-top:10px;font-weight:bold;}
+.container{max-width:1200px;margin:auto;background:white;padding:15px;border-radius:12px;display:none;width:100%;}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
+.header-logo{display:flex;align-items:center;gap:10px;}
+.header-logo img{width:40px;height:40px;border-radius:10px;}
+.header-logo h2{color:#0A1A2F;font-size:16px;}
+.badge-ceo{background:#8B5CF6;color:white;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+.btn-logout{background:#d32f2f;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;}
+.banner{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:15px;border-radius:12px;text-align:center;margin-bottom:15px;font-weight:bold;}
+.tabs{display:flex;border-bottom:2px solid #ddd;margin:15px 0;overflow-x:auto;}
+.tab{padding:12px 16px;font-weight:bold;cursor:pointer;color:#555;white-space:nowrap;font-size:14px;}
+.tab.active{color:#0A1A2F;border-bottom:3px solid #FF8C00;}
+.tab-content{display:none;}.tab-content.active{display:block;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:15px 0;}
+.stat-card{background:linear-gradient(135deg,#0A1A2F,#1a3a5f);color:white;padding:20px;border-radius:12px;text-align:center;}
+.stat-card h1{margin:0;font-size:28px;}
+.info-box{background:#e3f2fd;border-left:4px solid #0A1A2F;padding:12px;border-radius:8px;margin:15px 0;font-size:14px;}
+.share-box{background:#e3f2fd;padding:15px;border-radius:12px;margin:15px 0;}
+.copy-group{display:flex;gap:8px;flex-wrap:wrap;}
+.copy-group input{flex:1;min-width:200px;}
+.btn{padding:10px 15px;background:#FF8C00;color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:5px 2px;font-size:13px;}
+.btn-blue{background:#0A1A2F;}.btn-green{background:#25D366;}.btn-red{background:#d32f2f;}.btn-purple{background:#8B5CF6;}.btn-edit{background:#1976d2;}
+.parts-list{display:grid;grid-template-columns:1fr;gap:12px;}
+.part-item{background:#f9f9f9;padding:10px;border-radius:8px;display:flex;gap:10px;}
+.part-item img{width:90px;height:90px;object-fit:cover;border-radius:6px;}
+.part-info{flex:1;}
+.btn-group{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.btn-group button{flex:1;min-width:70px;}
+.table-wrapper{overflow-x:auto;}
     table{width:100%;border-collapse:collapse;min-width:600px;}
     table th,table td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px;}
     table th{background:#0A1A2F;color:white;}
+  .search-box{margin:15px 0;}
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div class="login-container" id="loginBox">
     <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png" alt="TCS Logo" class="logo-img">
     <h1>TCS PARTS BIZPORTAL</h1>
@@ -63,7 +59,6 @@
     <p id="loginError" class="error"></p>
 </div>
 
-<!-- MAIN APP -->
 <div class="container" id="formBox">
     <div class="header">
         <div class="header-logo">
@@ -85,7 +80,6 @@
         <div class="tab" onclick="openTab('reports')">Reports</div>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard" class="tab-content">
         <h3>📊 Dashboard</h3>
         <div class="stats-grid">
@@ -101,36 +95,52 @@
             <h4>📱 Share Customer Service Link</h4>
             <p>Customers use this link to request parts</p>
             <div class="copy-group">
-                <input type="text" id="customerLink" value="https://tcs-web.github.io/twinz-p/customer.html" readonly>
+                <!-- CLIENT LINK UPDATED -->
+                <input type="text" id="customerLink" value="https://tcs-web.github.io/twinz-parts-bizportal/?client=1" readonly>
                 <button class="btn btn-blue" onclick="copyLink()">Copy</button>
             </div>
             <button class="btn btn-green" onclick="shareWhatsApp()">Send via WhatsApp</button>
         </div>
     </div>
 
-    <!-- REQUESTS -->
     <div id="requests" class="tab-content active">
         <h3>📥 Customer Requests</h3>
         <div class="table-wrapper">
             <table id="requestsTable">
-                <thead>
-                    <tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr>
-                </thead>
+                <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody><tr><td colspan="7">Loading requests...</td></tr></tbody>
             </table>
         </div>
     </div>
 
-    <!-- VIN -->
     <div id="vin" class="tab-content"><h3>🚗 VIN Decoder</h3><input type="text" id="vinInput" placeholder="Enter 17 Digit VIN"><button class="btn" onclick="decodeVIN()">Decode</button><div id="vinResult"></div></div>
 
-    <!-- ADD PART -->
-    <div id="services" class="tab-content"><h3 id="formTitle">Add New Part</h3><input id="make" placeholder="Make"><input id="model" placeholder="Model"><input id="year" placeholder="Year"><input id="partName" placeholder="Part Name"><input id="price" placeholder="Price R"><input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)"><img id="preview" style="max-width:100%;display:none;"><button class="btn" onclick="savePart()">Save Part</button><p id="successMsg" style="color:green;"></p><p id="errorMsg" style="color:red;"></p></div>
+    <div id="services" class="tab-content">
+        <h3 id="formTitle">Add New Part</h3>
+        <input type="hidden" id="editId">
+        <input id="make" placeholder="Make e.g Toyota">
+        <input id="model" placeholder="Model e.g Hilux">
+        <input id="year" placeholder="Year e.g 2020">
+        <input id="partName" placeholder="Part Name e.g Alternator">
+        <input id="price" placeholder="Price R e.g 3500">
+        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)">
+        <img id="preview" style="max-width:100%;display:none;border-radius:8px;">
+        <button class="btn" onclick="savePart()" style="width:100%;">Save Part</button>
+        <button class="btn" onclick="resetForm()" style="background:#666;width:100%;">Clear</button>
+        <p id="successMsg" style="color:green;"></p><p id="errorMsg" style="color:red;"></p>
+    </div>
 
-    <!-- STOCK -->
-    <div id="stock" class="tab-content"><h3>📦 Stock</h3><button class="btn" onclick="filterParts('available')">Available</button><button class="btn" onclick="filterParts('sold')">Sold</button><div class="parts-list" id="partsList"></div></div>
+    <div id="stock" class="tab-content">
+        <h3>📦 Stock</h3>
+        <div class="search-box">
+            <input type="text" id="searchParts" placeholder="🔍 Search 10,000+ parts: Toyota, Hilux, Alternator..." onkeyup="searchParts()">
+        </div>
+        <button class="btn" onclick="filterParts('available')">Available</button>
+        <button class="btn" onclick="filterParts('sold')">Sold</button>
+        <button class="btn" onclick="filterParts('all')">All</button>
+        <div class="parts-list" id="partsList"></div>
+    </div>
 
-    <!-- REPORTS -->
     <div id="reports" class="tab-content"><h3>📑 Reports</h3><button class="btn btn-purple" onclick="downloadCSV()">Download CSV</button><button class="btn btn-red" onclick="downloadPDF()">Download PDF</button></div>
 </div>
 
@@ -155,9 +165,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
-let imageFile = null; let allPartsData = {}; let allRequestsData = {};
+let imageFile = null; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available';
 
-// TABS
 window.openTab = (tabName) => {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -167,47 +176,36 @@ window.openTab = (tabName) => {
 
 onAuthStateChanged(auth, (user) => {
   if (user && ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'].includes(user.email)) {
-    loginBox.style.display = 'none';
-    formBox.style.display = 'block';
-    loadData();
-  } else {
-    loginBox.style.display = 'block';
-    formBox.style.display = 'none';
-  }
+    loginBox.style.display = 'none'; formBox.style.display = 'block'; loadData();
+  } else { loginBox.style.display = 'block'; formBox.style.display = 'none'; }
 });
 
-window.login = () => {
-    loginError.innerText = "";
-    signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value)
-  .catch(err => loginError.innerText = "Login Failed: " + err.message);
-}
+window.login = () => { loginError.innerText = ""; signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), password.value).catch(err => loginError.innerText = "Login Failed: " + err.message); }
 window.logout = () => signOut(auth);
 window.previewImage = (e) => { imageFile = e.target.files[0]; preview.src = URL.createObjectURL(imageFile); preview.style.display = 'block'; }
 window.copyLink = () => { navigator.clipboard.writeText(customerLink.value); alert("Customer Link Copied!"); }
 window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURIComponent('Request TCS Parts here: '+customerLink.value)}`, '_blank'); }
 
-// CONNECTED TO CLIENT LINK - READS FROM FIREBASE
-function loadData(){
-    onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{allPartsData=s.val()||{};totalParts.innerText=Object.keys(allPartsData).length;filterParts('available');});
+window.searchParts = () => {
+    const term = searchParts.value.toLowerCase();
+    displayParts(Object.entries(allPartsData).filter(([k,p]) =>
+        p.make?.toLowerCase().includes(term) ||
+        p.model?.toLowerCase().includes(term) ||
+        p.partName?.toLowerCase().includes(term) ||
+        p.year?.toString().includes(term)
+    ));
+}
 
-    // THIS IS THE CLIENT LINK CONNECTION
+function loadData(){
+    onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{allPartsData=s.val()||{};totalParts.innerText=Object.keys(allPartsData).length;filterParts(currentFilter);});
     onValue(ref(db, 'tcs-parts-bizportal/requests'), s=>{
         allRequestsData=s.val()||{};
         let reqs=Object.entries(allRequestsData);
         totalRequests.innerText=reqs.length;
         pendingRequests.innerText=reqs.filter(([k,v])=>v.status==='pending').length;
-
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
-            tbody += `<tr>
-                <td>${v.date}</td>
-                <td>${v.name}</td>
-                <td>${v.phone}</td>
-                <td>${v.vehicle||'-'}</td>
-                <td>${v.part}</td>
-                <td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td>
-                <td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button></td>
-            </tr>`;
+            tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button></td></tr>`;
         });
         requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
     });
@@ -217,9 +215,59 @@ window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), 
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
-window.filterParts = (f)=>{partsList.innerHTML='';Object.entries(allPartsData).forEach(([k,p])=>{if(f==='available'&&p.status==='sold')return;if(f==='sold'&&p.status!=='sold')return;partsList.innerHTML+=`<div class="part-item"><img src="${p.image||'https://via.placeholder.com/90'}"><div><b>${p.year} ${p.make} ${p.model}</b><br>${p.partName}<br>R${p.price}<br><button class="btn btn-red" onclick="deletePart('${k}')">Delete</button></div></div>`;});}
+
+function displayParts(partsArray){
+    partsList.innerHTML = partsArray.length? '' : '<p>No parts found</p>';
+    partsArray.forEach(([k,p])=>{
+        partsList.innerHTML+=`
+        <div class="part-item">
+            <img src="${p.image||'https://via.placeholder.com/90'}">
+            <div class="part-info">
+                <b>${p.year} ${p.make} ${p.model}</b> <span style="background:${p.status==='sold'?'red':'#4CAF50'};color:white;padding:2px 6px;border-radius:4px;font-size:11px;">${p.status||'available'}</span><br>
+                ${p.partName}<br><b>R${Number(p.price).toLocaleString()}</b>
+                <div class="btn-group">
+                    <button class="btn btn-edit" onclick="editPart('${k}')">Edit</button>
+                    ${p.status!=='sold'?`<button class="btn btn-green" onclick="markSold('${k}')">Sold</button>`:''}
+                    <button class="btn btn-red" onclick="deletePart('${k}')">Delete</button>
+                </div>
+            </div>
+        </div>`;
+    });
+}
+
+window.filterParts = (f)=>{
+    currentFilter = f;
+    let parts = Object.entries(allPartsData);
+    if(f==='available') parts = parts.filter(([k,p])=>p.status!=='sold');
+    if(f==='sold') parts = parts.filter(([k,p])=>p.status==='sold');
+    displayParts(parts);
+}
+
+window.editPart = (id) => {
+    openTab('services');
+    const p = allPartsData[id];
+    formTitle.innerText = "Edit Part";
+    editId.value = id;
+    ['make','model','year','partName','price'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
+    preview.src = p.image; preview.style.display = 'block';
+}
+
+window.markSold = (id) => { if(confirm("Mark as SOLD?")) update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold'}); }
 window.deletePart = (id) => { if(confirm("DELETE this part?")) remove(ref(db, `tcs-parts-bizportal/categories/${id}`)); }
-window.savePart = async () => { /* your save function */ }
+
+window.savePart = async () => {
+    errorMsg.innerText = ""; successMsg.innerText = "";
+    if(!make.value ||!partName.value ||!price.value){ errorMsg.innerText = "Fill required fields"; return; }
+    let partData = { make: make.value, model: model.value, year: year.value, partName: partName.value, price: Number(price.value), status: 'available', dateAdded: new Date().toISOString() };
+    try {
+        if(imageFile){ const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + imageFile.name); const snap = await uploadBytes(fileRef, imageFile); partData.image = await getDownloadURL(snap.ref); }
+        else if(editId.value) { partData.image = preview.src; } else { errorMsg.innerText = "Select image"; return; }
+        if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); successMsg.innerText = "Part Updated!"; }
+        else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); successMsg.innerText = "Part Added!"; }
+        resetForm();
+    } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
+}
+window.resetForm = () => { formTitle.innerText = "Add New Part"; editId.value = ''; ['make','model','year','partName','price'].forEach(k => document.getElementById(k).value = ''); preview.style.display = 'none'; imageFile = null; }
 </script>
 </body>
 </html>
