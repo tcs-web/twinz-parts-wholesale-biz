@@ -52,8 +52,11 @@
 #clientApp{background:#f5f7fa;padding:10px;}
 .client-header{text-align:center;padding:15px;background:white;border-radius:12px;margin-bottom:15px;}
 .client-header img{width:70px;}
-.client-filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0;margin-bottom:15px;}
-.client-filter-btn{padding:8px 14px;background:white;border:2px solid #0A1A2F;border-radius:20px;font-weight:bold;white-space:nowrap;cursor:pointer;}
+.client-vin-box{background:white;padding:15px;border-radius:12px;margin-bottom:15px;border:2px solid #0A1A2F;}
+.client-vin-box h3{color:#0A1A2F;margin-bottom:10px;font-size:16px;}
+.client-filter-wrap{background:white;padding:12px;border-radius:12px;margin-bottom:15px;}
+.client-filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0;}
+.client-filter-btn{padding:8px 14px;background:white;border:2px solid #0A1A2F;border-radius:20px;font-weight:bold;white-space:nowrap;cursor:pointer;font-size:13px;}
 .client-filter-btn.active{background:#0A1A2F;color:white;}
 .client-grid{display:grid;grid-template-columns:1fr;gap:15px;}
 .client-card{background:white;border-radius:12px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);}
@@ -80,13 +83,20 @@
         <h2>TCS PARTS BIZPORTAL</h2>
         <p>Available Parts - Request WhatsApp</p>
     </div>
-    <div class="client-filters" id="clientFilters">
-        <button class="client-filter-btn active" onclick="filterClient('all',this)">All</button>
-        <button class="client-filter-btn" onclick="filterClient('Doors',this)">Doors</button>
-        <button class="client-filter-btn" onclick="filterClient('Boots',this)">Boots/Tailgate</button>
-        <button class="client-filter-btn" onclick="filterClient('Rims',this)">Rims</button>
-        <button class="client-filter-btn" onclick="filterClient('Engine',this)">Engine</button>
-        <button class="client-filter-btn" onclick="filterClient('Electrical',this)">Wires/Modules</button>
+
+    <!-- VIN DECODER ADDED HERE -->
+    <div class="client-vin-box">
+        <h3>🚗 VIN Decoder</h3>
+        <input type="text" id="clientVinInput" placeholder="Enter 17 Digit VIN to find exact parts" maxlength="17">
+        <button class="btn btn-blue" onclick="decodeClientVIN()" style="width:100%;margin-top:8px;">Decode VIN</button>
+        <div id="clientVinResult"></div>
+    </div>
+
+    <div class="client-filter-wrap">
+        <select id="clientCategorySelect" onchange="filterClient(this.value)" style="margin-bottom:10px;">
+            <option value="all">All Categories</option>
+        </select>
+        <div class="client-filters" id="clientFilters"></div>
     </div>
     <div class="client-grid" id="clientPartsList"><p style="text-align:center;">Loading parts...</p></div>
 </div>
@@ -147,18 +157,9 @@
             <input id="year" placeholder="Year e.g 2020">
             <select id="category">
                 <option value="">Select Category</option>
-                <option>Doors</option>
-                <option>Boots</option>
-                <option>Bonnet</option>
-                <option>Rims</option>
-                <option>Engine</option>
-                <option>Gearbox</option>
-                <option>Electrical</option>
-                <option>Wires</option>
-                <option>Modules</option>
-                <option>Interior</option>
-                <option>Suspension</option>
-                <option>Other</option>
+                <option>Doors</option><option>Boots</option><option>Bonnet</option><option>Rims</option>
+                <option>Engine</option><option>Gearbox</option><option>Electrical</option><option>Wires</option>
+                <option>Modules</option><option>Interior</option><option>Suspension</option><option>Other</option>
             </select>
             <input id="partName" placeholder="Part Name e.g Front Left Door">
             <input id="price" placeholder="Price R e.g 3500">
@@ -207,6 +208,8 @@ const db = getDatabase(app);
 const storage = getStorage(app);
 let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available'; let currentClientFilter = 'all';
 
+const CATEGORIES = ['Doors','Boots','Bonnet','Rims','Engine','Gearbox','Electrical','Wires','Modules','Interior','Suspension','Other'];
+
 const urlParams = new URLSearchParams(window.location.search);
 const isClient = urlParams.has('client');
 const baseUrl = window.location.origin + window.location.pathname;
@@ -214,6 +217,7 @@ const clientLink = `${baseUrl}?client=1`;
 
 if(isClient){
     document.getElementById('clientApp').style.display = 'block';
+    setupClientFilters();
     loadClientParts();
 } else {
     document.getElementById('adminApp').style.display = 'block';
@@ -221,6 +225,24 @@ if(isClient){
 }
 
 // ========== CLIENT FUNCTIONS ==========
+window.decodeClientVIN = () => {
+    const vin = clientVinInput.value.toUpperCase();
+    if(vin.length!== 17){
+        clientVinResult.innerHTML = `<div class="info-box" style="background:#ffebee;border-color:red;">VIN must be 17 characters</div>`;
+        return;
+    }
+    clientVinResult.innerHTML = `<div class="info-box">VIN: ${vin}<br>Vehicle details will show here. Connect to VIN API for real data.</div>`;
+}
+
+function setupClientFilters(){
+    let select = document.getElementById('clientCategorySelect');
+    let buttonsDiv = document.getElementById('clientFilters');
+    CATEGORIES.forEach(cat=>{
+        select.innerHTML += `<option value="${cat}">${cat}</option>`;
+        buttonsDiv.innerHTML += `<button class="client-filter-btn" onclick="filterClient('${cat}',this)">${cat}</button>`;
+    });
+}
+
 function loadClientParts(){
     onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{
         allPartsData=s.val()||{};
@@ -232,6 +254,8 @@ window.filterClient = (cat, btn) => {
     currentClientFilter = cat;
     document.querySelectorAll('.client-filter-btn').forEach(b=>b.classList.remove('active'));
     if(btn) btn.classList.add('active');
+    if(cat==='all') document.querySelector('.client-filter-btn').classList.add('active');
+    document.getElementById('clientCategorySelect').value = cat;
 
     let parts = Object.entries(allPartsData).filter(([k,p])=>p.status!=='sold');
     if(cat!== 'all') parts = parts.filter(([k,p])=>p.category === cat);
