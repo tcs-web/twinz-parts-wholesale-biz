@@ -141,6 +141,7 @@
                 <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
                 <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
             </div>
+            <!-- INVOICE GENERATOR 1: WALK IN -->
             <div class="invoice-box">
                 <h4>🧾 Quick Invoice - Walk In Client</h4>
                 <input id="invClient" placeholder="Client Name">
@@ -375,7 +376,6 @@ window.searchParts = () => {
 }
 
 function loadData(){
-    // FIX 1: Load stock and display it immediately
     onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{
         allPartsData=s.val()||{};
         totalParts.innerText=Object.keys(allPartsData).length;
@@ -389,7 +389,8 @@ function loadData(){
         pendingRequests.innerText=reqs.filter(([k,v])=>v.status==='pending').length;
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
-            tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button></td></tr>`;
+            // INVOICE GENERATOR 2: ADDED HERE AFTER MARK DONE
+            tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button><button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
         requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
     });
@@ -399,7 +400,6 @@ function loadData(){
         let invs=Object.entries(allInvoicesData);
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
-            // FIX 2: Added PDF button for each invoice
             tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
         invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
@@ -417,13 +417,25 @@ window.createInvoice = () => {
     setTimeout(()=>invMsg.innerText='',3000);
 }
 
+// INVOICE GENERATOR 2 FUNCTION
+window.createInvoiceFromRequest = (reqId) => {
+    const req = allRequestsData[reqId];
+    if(!req) return;
+    const amount = prompt(`Generate Invoice for: ${req.part}\n\nEnter Amount R:`);
+    if(!amount) return;
+    push(ref(db, 'tcs-parts-bizportal/invoices'), {
+        client: req.name, phone: req.phone, part: req.part + ' - ' + req.vehicle,
+        amount: Number(amount), status: 'pending', date: new Date().toLocaleString(), requestId: reqId
+    });
+    alert("✅ Invoice Created for " + req.name);
+}
+
 window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
 
-// NEW FUNCTION: Download single invoice PDF
 window.downloadSingleInvoicePDF = (id) => {
     const inv = allInvoicesData[id];
     if(!inv) return;
