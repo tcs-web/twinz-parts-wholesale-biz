@@ -47,6 +47,7 @@
 .search-box{margin:15px 0;}
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 .category-badge{background:#8B5CF6;color:white;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;}
+.invoice-box{background:#fff3e0;padding:15px;border-radius:12px;margin:15px 0;border-left:4px solid #FF8C00;}
 
 /* CLIENT SHOP STYLE */
 #clientApp{background:#f5f7fa;padding:10px;}
@@ -54,6 +55,7 @@
 .client-header img{width:70px;}
 .client-vin-box{background:white;padding:15px;border-radius:12px;margin-bottom:15px;border:2px solid #0A1A2F;}
 .client-vin-box h3{color:#0A1A2F;margin-bottom:10px;font-size:16px;}
+.client-search-box{background:white;padding:12px;border-radius:12px;margin-bottom:15px;}
 .client-filter-wrap{background:white;padding:12px;border-radius:12px;margin-bottom:15px;}
 .client-filters{display:flex;gap:8px;overflow-x:auto;padding:10px 0;}
 .client-filter-btn{padding:8px 14px;background:white;border:2px solid #0A1A2F;border-radius:20px;font-weight:bold;white-space:nowrap;cursor:pointer;font-size:13px;}
@@ -84,12 +86,16 @@
         <p>Available Parts - Request WhatsApp</p>
     </div>
 
-    <!-- VIN DECODER ADDED HERE -->
     <div class="client-vin-box">
         <h3>🚗 VIN Decoder</h3>
         <input type="text" id="clientVinInput" placeholder="Enter 17 Digit VIN to find exact parts" maxlength="17">
         <button class="btn btn-blue" onclick="decodeClientVIN()" style="width:100%;margin-top:8px;">Decode VIN</button>
         <div id="clientVinResult"></div>
+    </div>
+
+    <!-- CLIENT SEARCH ADDED -->
+    <div class="client-search-box">
+        <input type="text" id="clientSearch" placeholder="🔍 Search parts: Toyota, Hilux, Door, Rims..." onkeyup="searchClient()">
     </div>
 
     <div class="client-filter-wrap">
@@ -120,20 +126,30 @@
         </div>
         <div class="banner">💼 BUSINESS SOLUTIONS & SERVICES 💼</div>
         <div class="tabs">
-            <div class="tab" onclick="openTab('dashboard')">Dashboard</div>
-            <div class="tab active" onclick="openTab('requests')">Requests</div>
+            <div class="tab active" onclick="openTab('dashboard')">Dashboard</div>
+            <div class="tab" onclick="openTab('requests')">Requests</div>
+            <div class="tab" onclick="openTab('invoices')">Invoices</div>
             <div class="tab" onclick="openTab('vin')">VIN Decoder</div>
             <div class="tab" onclick="openTab('services')">Add Part</div>
             <div class="tab" onclick="openTab('stock')">Stock</div>
             <div class="tab" onclick="openTab('reports')">Reports</div>
         </div>
 
-        <div id="dashboard" class="tab-content">
+        <div id="dashboard" class="tab-content active">
             <h3>📊 Dashboard</h3>
             <div class="stats-grid">
                 <div class="stat-card"><h1 id="totalParts">0</h1><p>Total Parts</p></div>
                 <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
                 <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
+            </div>
+            <div class="invoice-box">
+                <h4>🧾 Quick Invoice - Walk In Client</h4>
+                <input id="invClient" placeholder="Client Name">
+                <input id="invPhone" placeholder="Phone">
+                <input id="invPart" placeholder="Part Description">
+                <input id="invAmount" placeholder="Amount R">
+                <button class="btn btn-purple" onclick="createInvoice()">Generate Invoice</button>
+                <p id="invMsg" style="color:green;"></p>
             </div>
             <div class="share-box">
                 <h4>📱 Share Customer Service Link</h4>
@@ -142,9 +158,14 @@
             </div>
         </div>
 
-        <div id="requests" class="tab-content active">
+        <div id="requests" class="tab-content">
             <h3>📥 Customer Requests</h3>
             <div class="table-wrapper"><table id="requestsTable"><thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div id="invoices" class="tab-content">
+            <h3>🧾 Invoice Requests</h3>
+            <div class="table-wrapper"><table id="invoicesTable"><thead><tr><th>Date</th><th>Client</th><th>Phone</th><th>Part</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="vin" class="tab-content"><h3>🚗 VIN Decoder</h3><input type="text" id="vinInput" placeholder="Enter 17 Digit VIN"><button class="btn" onclick="decodeVIN()">Decode</button><div id="vinResult"></div></div>
@@ -206,7 +227,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
-let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let currentFilter = 'available'; let currentClientFilter = 'all';
+let imageFiles = []; let allPartsData = {}; let allRequestsData = {}; let allInvoicesData = {}; let currentFilter = 'available'; let currentClientFilter = 'all'; let clientSearchTerm = '';
 
 const CATEGORIES = ['Doors','Boots','Bonnet','Rims','Engine','Gearbox','Electrical','Wires','Modules','Interior','Suspension','Other'];
 
@@ -234,6 +255,11 @@ window.decodeClientVIN = () => {
     clientVinResult.innerHTML = `<div class="info-box">VIN: ${vin}<br>Vehicle details will show here. Connect to VIN API for real data.</div>`;
 }
 
+window.searchClient = () => {
+    clientSearchTerm = clientSearch.value.toLowerCase();
+    filterClient(currentClientFilter);
+}
+
 function setupClientFilters(){
     let select = document.getElementById('clientCategorySelect');
     let buttonsDiv = document.getElementById('clientFilters');
@@ -254,11 +280,17 @@ window.filterClient = (cat, btn) => {
     currentClientFilter = cat;
     document.querySelectorAll('.client-filter-btn').forEach(b=>b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-    if(cat==='all') document.querySelector('.client-filter-btn').classList.add('active');
+    if(cat==='all') document.querySelector('.client-filter-btn')?.classList.add('active');
     document.getElementById('clientCategorySelect').value = cat;
 
     let parts = Object.entries(allPartsData).filter(([k,p])=>p.status!=='sold');
     if(cat!== 'all') parts = parts.filter(([k,p])=>p.category === cat);
+    if(clientSearchTerm) parts = parts.filter(([k,p])=>
+        p.make?.toLowerCase().includes(clientSearchTerm) ||
+        p.model?.toLowerCase().includes(clientSearchTerm) ||
+        p.partName?.toLowerCase().includes(clientSearchTerm) ||
+        p.category?.toLowerCase().includes(clientSearchTerm)
+    );
 
     clientPartsList.innerHTML = '';
     parts.forEach(([k,p])=>{
@@ -277,7 +309,7 @@ window.filterClient = (cat, btn) => {
             <button class="btn-request" onclick="requestPart('${p.partName}','${p.make} ${p.model} ${p.year}')">Request Now</button>
         </div>`;
     });
-    if(parts.length===0) clientPartsList.innerHTML='<p style="text-align:center;">No parts in this category</p>';
+    if(parts.length===0) clientPartsList.innerHTML='<p style="text-align:center;">No parts found</p>';
 }
 
 window.changeMainImg = (id, src, el) => {
@@ -330,13 +362,17 @@ window.shareWhatsApp = () => { window.open(`https://wa.me/?text=${encodeURICompo
 
 window.searchParts = () => {
     const term = searchParts.value.toLowerCase();
-    displayParts(Object.entries(allPartsData).filter(([k,p]) =>
+    let parts = Object.entries(allPartsData);
+    if(currentFilter==='available') parts = parts.filter(([k,p])=>p.status!=='sold');
+    if(currentFilter==='sold') parts = parts.filter(([k,p])=>p.status==='sold');
+    parts = parts.filter(([k,p]) =>
         p.make?.toLowerCase().includes(term) ||
         p.model?.toLowerCase().includes(term) ||
         p.partName?.toLowerCase().includes(term) ||
         p.category?.toLowerCase().includes(term) ||
         p.year?.toString().includes(term)
-    ));
+    );
+    displayParts(parts);
 }
 
 function loadData(){
@@ -352,8 +388,29 @@ function loadData(){
         });
         requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
     });
+    onValue(ref(db, 'tcs-parts-bizportal/invoices'), s=>{
+        allInvoicesData=s.val()||{};
+        let invs=Object.entries(allInvoicesData);
+        let tbody = '';
+        invs.reverse().forEach(([k,v])=>{
+            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button></td></tr>`;
+        });
+        invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
+    });
 }
 
+window.createInvoice = () => {
+    if(!invClient.value ||!invPart.value ||!invAmount.value){ invMsg.innerText="Fill all fields"; return; }
+    push(ref(db, 'tcs-parts-bizportal/invoices'), {
+        client: invClient.value, phone: invPhone.value, part: invPart.value,
+        amount: Number(invAmount.value), status: 'pending', date: new Date().toLocaleString()
+    });
+    invMsg.innerText = "Invoice Created!";
+    invClient.value = invPhone.value = invPart.value = invAmount.value = '';
+    setTimeout(()=>invMsg.innerText='',3000);
+}
+
+window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
@@ -381,10 +438,7 @@ function displayParts(partsArray){
 
 window.filterParts = (f)=>{
     currentFilter = f;
-    let parts = Object.entries(allPartsData);
-    if(f==='available') parts = parts.filter(([k,p])=>p.status!=='sold');
-    if(f==='sold') parts = parts.filter(([k,p])=>p.status==='sold');
-    displayParts(parts);
+    searchParts();
 }
 
 window.editPart = (id) => {
@@ -395,6 +449,8 @@ window.editPart = (id) => {
     ['make','model','year','partName','price','oldPrice','category'].forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k] || ''; });
     previewMulti.innerHTML = '';
     (p.images||[p.image]).forEach(img=>{ if(img) previewMulti.innerHTML += `<img src="${img}">` });
+    // Add button to add more photos
+    previewMulti.innerHTML += `<button type="button" class="btn btn-blue" onclick="document.getElementById('imageFiles').click()">+ Add Photo</button>`;
 }
 
 window.markSold = (id) => { if(confirm("Mark as SOLD?")) update(ref(db, `tcs-parts-bizportal/categories/${id}`), {status: 'sold'}); }
@@ -405,18 +461,18 @@ window.savePart = async () => {
     if(!make.value ||!partName.value ||!price.value ||!category.value){ errorMsg.innerText = "Fill Make, Category, Part Name and Price"; return; }
     let partData = { make: make.value, model: model.value, year: year.value, category: category.value, partName: partName.value, price: Number(price.value), oldPrice: Number(oldPrice.value)||0, status: 'available', dateAdded: new Date().toISOString() };
     try {
-        let uploadedImages = [];
+        let existingImages = editId.value? (allPartsData[editId.value].images || []) : [];
+        let uploadedImages = [...existingImages];
         if(imageFiles.length > 0){
             for(let file of imageFiles){
                 const fileRef = sRef(storage, 'parts/' + Date.now() + '-' + file.name);
                 const snap = await uploadBytes(fileRef, file);
                 uploadedImages.push(await getDownloadURL(snap.ref));
             }
-            partData.images = uploadedImages;
-            partData.image = uploadedImages[0];
-        } else if(editId.value) {
-            partData.images = allPartsData[editId.value].images || [previewMulti.querySelector('img')?.src];
-        } else { errorMsg.innerText = "Select at least 1 image"; return; }
+        }
+        if(uploadedImages.length===0){ errorMsg.innerText = "Select at least 1 image"; return; }
+        partData.images = uploadedImages.slice(0,4);
+        partData.image = uploadedImages[0];
 
         if(editId.value){ await update(ref(db, `tcs-parts-bizportal/categories/${editId.value}`), partData); successMsg.innerText = "Part Updated!"; }
         else { await push(ref(db, 'tcs-parts-bizportal/categories'), partData); successMsg.innerText = "Part Added!"; }
