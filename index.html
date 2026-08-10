@@ -48,6 +48,7 @@
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 .category-badge{background:#8B5CF6;color:white;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;}
 .invoice-box{background:#fff3e0;padding:15px;border-radius:12px;margin:15px 0;border-left:4px solid #FF8C00;}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin:10px 0;}
 
 /* CLIENT SHOP STYLE */
 #clientApp{background:#f5f7fa;padding:10px;}
@@ -81,7 +82,7 @@
 <!-- CLIENT APP -->
 <div id="clientApp">
     <div class="client-header">
-        <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png">
+        <img src="https://i.ibb.co/Q5MSVCC/IMG-20260605-WA0002.png">
         <h2>TCS PARTS BIZPORTAL</h2>
         <p>Available Parts - Request WhatsApp</p>
     </div>
@@ -109,7 +110,7 @@
 <!-- ADMIN APP -->
 <div id="adminApp">
     <div class="login-container" id="loginBox">
-        <img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png" alt="TCS Logo" class="logo-img">
+        <img src="https://i.ibb.co/Q5MSVCC/IMG-20260605-WA0002.png" alt="TCS Logo" class="logo-img">
         <h1>TCS PARTS BIZPORTAL</h1>
         <input type="email" id="email" placeholder="ceo@tcspartsbizportal.co.za">
         <input type="password" id="password" placeholder="Password">
@@ -119,7 +120,7 @@
 
     <div class="container" id="formBox">
         <div class="header">
-            <div class="header-logo"><img src="https://i.ibb.co/tp1Ngn78/IMG-20260605-WA0002.png"><h2>TCS PARTS BIZPORTAL</h2></div>
+            <div class="header-logo"><img src="https://i.ibb.co/Q5MSVCC/IMG-20260605-WA0002.png"><h2>TCS PARTS BIZPORTAL</h2></div>
             <span class="badge-ceo">CEO</span>
             <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
@@ -146,8 +147,13 @@
                 <h4>🧾 Quick Invoice - Walk In Client</h4>
                 <input id="invClient" placeholder="Client Name">
                 <input id="invPhone" placeholder="Phone">
+                <input id="invEmail" placeholder="Email - optional">
                 <input id="invPart" placeholder="Part Description">
                 <input id="invAmount" placeholder="Amount R">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="addVAT">
+                    <label for="addVAT">Add 15% VAT</label>
+                </div>
                 <button class="btn btn-purple" onclick="createInvoice()">Generate Invoice</button>
                 <p id="invMsg" style="color:green;"></p>
             </div>
@@ -399,7 +405,7 @@ function loadData(){
         let invs=Object.entries(allInvoicesData);
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
-            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
+            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
         invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
     });
@@ -407,14 +413,19 @@ function loadData(){
 
 window.createInvoice = () => {
     if(!invClient.value ||!invPart.value ||!invAmount.value){ invMsg.innerText="Fill all fields"; return; }
+    const amount = Number(invAmount.value);
+    const addVAT = addVAT.checked;
+    const vat = addVAT? amount * 0.15 : 0;
+    const total = amount + vat;
+
     const newInvoice = {
-        client: invClient.value, phone: invPhone.value, part: invPart.value,
-        amount: Number(invAmount.value), status: 'pending', date: new Date().toLocaleString()
+        client: invClient.value, phone: invPhone.value, email: invEmail.value, part: invPart.value,
+        subtotal: amount, vat: vat, amount: total, status: 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now()
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     invMsg.innerText = "Invoice Created! Downloading...";
-    downloadInvoicePDFDirect(newInvoice); // AUTO DOWNLOAD
-    invClient.value = invPhone.value = invPart.value = invAmount.value = '';
+    downloadInvoicePDFDirect(newInvoice);
+    invClient.value = invPhone.value = invEmail.value = invPart.value = invAmount.value = ''; addVAT.checked = false;
     setTimeout(()=>invMsg.innerText='',3000);
 }
 
@@ -422,15 +433,19 @@ window.createInvoice = () => {
 window.createInvoiceFromRequest = (reqId) => {
     const req = allRequestsData[reqId];
     if(!req) return;
-    const amount = prompt(`Generate Invoice for: ${req.part}\n\nEnter Amount R:`);
+    const amount = Number(prompt(`Generate Invoice for: ${req.part}\n\nEnter Amount R:`));
     if(!amount) return;
+    const addVAT = confirm("Add 15% VAT?");
+    const vat = addVAT? amount * 0.15 : 0;
+    const total = amount + vat;
+
     const newInvoice = {
-        client: req.name, phone: req.phone, part: req.part + ' - ' + req.vehicle,
-        amount: Number(amount), status: 'pending', date: new Date().toLocaleString(), requestId: reqId
+        client: req.name, phone: req.phone, email: '', part: req.part + ' - ' + req.vehicle,
+        subtotal: amount, vat: vat, amount: total, status: 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now(), requestId: reqId
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     alert("✅ Invoice Created for " + req.name);
-    downloadInvoicePDFDirect(newInvoice); // AUTO DOWNLOAD
+    downloadInvoicePDFDirect(newInvoice);
 }
 
 window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
@@ -439,21 +454,74 @@ window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinI
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
 
-// NEW FUNCTION: Auto download without ID
+// NEW INVOICE FORMAT WITH LOGO
 function downloadInvoicePDFDirect(inv) {
     const {jsPDF}=window.jspdf;const doc=new jsPDF();
-    doc.setFontSize(18); doc.text("TCS PARTS BIZPORTAL", 14, 20);
-    doc.setFontSize(12); doc.text("TAX INVOICE", 14, 30);
-    doc.line(14,32,200,32);
-    doc.text(`Date: ${inv.date}`, 14, 40);
-    doc.text(`Invoice To: ${inv.client}`, 14, 50);
-    doc.text(`Phone: ${inv.phone}`, 14, 60);
-    doc.text(`Description: ${inv.part}`, 14, 70);
-    doc.text(`Amount: R${Number(inv.amount).toLocaleString()}`, 14, 80);
-    doc.text(`Status: ${inv.status}`, 14, 90);
-    doc.line(14,100,200,100);
-    doc.text("Thank you for your business!", 14, 110);
-    doc.save(`TCS_Invoice_${inv.client}.pdf`);
+    const logo = new Image();
+    logo.src = 'https://i.ibb.co/Q5MSVCC/IMG-20260605-WA0002.png';
+
+    doc.addImage(logo, 'PNG', 14, 12, 25, 25);
+    doc.setFontSize(11); doc.setFont("helvetica","bold");
+    doc.text("TCS PARTS BIZPORTAL", 45, 18);
+    doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text("Reg: 2024/444383/07", 45, 24);
+    doc.text("Lephalale, Limpopo, South Africa", 45, 29);
+    doc.text("Bank: Standard Bank | Acc: 1028459434", 45, 34);
+    doc.text("Tel: 0825247352 | 0698494596", 45, 39);
+
+    doc.setFontSize(16); doc.setFont("helvetica","bold");
+    doc.text("TAX INVOICE", 140, 18);
+    doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text(`Invoice #: ${inv.invoiceNo}`, 140, 24);
+    doc.text(`Date: ${inv.date}`, 140, 29);
+
+    doc.line(14,45,200,45);
+
+    doc.setFontSize(10); doc.setFont("helvetica","bold");
+    doc.text("BILL TO:", 14, 55);
+    doc.setFont("helvetica","normal");
+    doc.text(inv.client, 14, 61);
+    doc.text(inv.phone, 14, 66);
+    if(inv.email) doc.text(inv.email, 14, 71);
+
+    // TABLE
+    doc.setFont("helvetica","bold");
+    doc.text("Service", 14, 85);
+    doc.text("Qty", 120, 85);
+    doc.text("Rate", 150, 85);
+    doc.text("Amount", 175, 85);
+    doc.line(14,87,200,87);
+
+    doc.setFont("helvetica","normal");
+    doc.text(inv.part, 14, 95);
+    doc.text("1", 120, 95);
+    doc.text(`R${Number(inv.subtotal).toFixed(2)}`, 150, 95);
+    doc.text(`R${Number(inv.subtotal).toFixed(2)}`, 175, 95);
+
+    let y = 105;
+    if(inv.vat > 0){
+        doc.text(`Subtotal: R${Number(inv.subtotal).toFixed(2)}`, 140, y);
+        y+=6;
+        doc.text(`VAT 15%: R${Number(inv.vat).toFixed(2)}`, 140, y);
+        y+=6;
+    }
+    doc.setFont("helvetica","bold");
+    doc.text(`TOTAL: R${Number(inv.amount).toFixed(2)}`, 140, y);
+
+    // PAID STAMP
+    if(inv.status === 'paid'){
+        doc.setTextColor(0,180,0);
+        doc.setFontSize(40); doc.setFont("helvetica","bold");
+        doc.text("PAID", 90, 140, {angle: -30});
+        doc.setTextColor(0,0,0);
+    }
+
+    // FOOTER
+    doc.setFontSize(8); doc.setFont("helvetica","normal");
+    doc.text("Bank: Standard Bank 1028459434 | WhatsApp: 0825247352 | 0698494596", 14, 280);
+    doc.text("Thank you for choosing TCS PARTS BIZPORTAL", 14, 285);
+
+    doc.save(`TCS_Invoice_${inv.invoiceNo}.pdf`);
 }
 
 window.downloadSingleInvoicePDF = (id) => {
@@ -524,12 +592,12 @@ window.savePart = async () => {
         resetForm();
     } catch(err){ errorMsg.innerText = "SAVE FAILED: " + err.message; }
 }
-window.resetForm = () => { 
-    formTitle.innerText = "Add New Part"; 
-    editId.value = ''; 
-    ['make','model','year','partName','price','oldPrice','category'].forEach(k => document.getElementById(k).value = ''); 
-    previewMulti.innerHTML = ''; 
-    imageFiles = []; 
+window.resetForm = () => {
+    formTitle.innerText = "Add New Part";
+    editId.value = '';
+    ['make','model','year','partName','price','oldPrice','category'].forEach(k => document.getElementById(k).value = '');
+    previewMulti.innerHTML = '';
+    imageFiles = [];
 }
 </script>
 </body>
