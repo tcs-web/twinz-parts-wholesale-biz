@@ -141,6 +141,15 @@
                 <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
                 <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
             </div>
+            <div class="invoice-box">
+                <h4>🧾 Quick Invoice - Walk In Client</h4>
+                <input id="invClient" placeholder="Client Name">
+                <input id="invPhone" placeholder="Phone">
+                <input id="invPart" placeholder="Part Description">
+                <input id="invAmount" placeholder="Amount R">
+                <button class="btn btn-purple" onclick="createInvoice()">Generate Invoice</button>
+                <p id="invMsg" style="color:green;"></p>
+            </div>
             <div class="share-box">
                 <h4>📱 Share Customer Service Link</h4>
                 <div class="copy-group"><input type="text" id="customerLink" readonly><button class="btn btn-blue" onclick="copyLink()">Copy</button></div>
@@ -149,23 +158,12 @@
         </div>
 
         <div id="requests" class="tab-content">
-            <h3>📥 Customer Requests + Quick Invoice</h3>
-            <div class="invoice-box">
-                <h4>🧾 Quick Invoice - Walk In / Request</h4>
-                <input id="invClient" placeholder="Client Name">
-                <input id="invPhone" placeholder="Phone">
-                <input id="invPart" placeholder="Part Description">
-                <input id="invAmount" placeholder="Amount R">
-                <button class="btn btn-purple" onclick="createInvoice()">Generate & Save Invoice</button>
-                <button class="btn btn-green" onclick="downloadInvoiceCSV()">Download CSV</button>
-                <p id="invMsg" style="color:green;"></p>
-            </div>
+            <h3>📥 Customer Requests</h3>
             <div class="table-wrapper"><table id="requestsTable"><thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Vehicle</th><th>Part</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="invoices" class="tab-content">
-            <h3>🧾 All Invoices</h3>
-            <button class="btn btn-purple" onclick="downloadInvoiceCSV()">Download All Invoices CSV</button>
+            <h3>🧾 Invoice Requests</h3>
             <div class="table-wrapper"><table id="invoicesTable"><thead><tr><th>Date</th><th>Client</th><th>Phone</th><th>Part</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
         </div>
 
@@ -203,7 +201,7 @@
             <div class="parts-list" id="partsList"></div>
         </div>
 
-        <div id="reports" class="tab-content"><h3>📑 Reports</h3><button class="btn btn-purple" onclick="downloadCSV()">Download Stock CSV</button><button class="btn btn-red" onclick="downloadPDF()">Download Stock PDF</button></div>
+        <div id="reports" class="tab-content"><h3>📑 Reports</h3><button class="btn btn-purple" onclick="downloadCSV()">Download CSV</button><button class="btn btn-red" onclick="downloadPDF()">Download PDF</button></div>
     </div>
 </div>
 
@@ -377,7 +375,7 @@ window.searchParts = () => {
 }
 
 function loadData(){
-    // FIX 1: Load stock first then display
+    // FIX 1: Load stock and display it immediately
     onValue(ref(db, 'tcs-parts-bizportal/categories'), s=>{
         allPartsData=s.val()||{};
         totalParts.innerText=Object.keys(allPartsData).length;
@@ -401,7 +399,8 @@ function loadData(){
         let invs=Object.entries(allInvoicesData);
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
-            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadInvoicePDF('${k}')">PDF</button></td></tr>`;
+            // FIX 2: Added PDF button for each invoice
+            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
         invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
     });
@@ -421,22 +420,26 @@ window.createInvoice = () => {
 window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
-
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
-window.downloadInvoiceCSV = () => {let csv='Date,Client,Phone,Part,Amount,Status\n';Object.values(allInvoicesData).forEach(i=>csv+=`${i.date},${i.client},${i.phone},${i.part},${i.amount},${i.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Invoices.csv';a.click();}
-window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Stock_Report.pdf");}
-window.downloadInvoicePDF = (id) => {
-    const inv = allInvoicesData[id]; if(!inv) return;
+window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
+
+// NEW FUNCTION: Download single invoice PDF
+window.downloadSingleInvoicePDF = (id) => {
+    const inv = allInvoicesData[id];
+    if(!inv) return;
     const {jsPDF}=window.jspdf;const doc=new jsPDF();
     doc.setFontSize(18); doc.text("TCS PARTS BIZPORTAL", 14, 20);
-    doc.setFontSize(12); doc.text("INVOICE", 14, 30);
+    doc.setFontSize(12); doc.text("TAX INVOICE", 14, 30);
+    doc.line(14,32,200,32);
     doc.text(`Date: ${inv.date}`, 14, 40);
-    doc.text(`Client: ${inv.client}`, 14, 50);
+    doc.text(`Invoice To: ${inv.client}`, 14, 50);
     doc.text(`Phone: ${inv.phone}`, 14, 60);
-    doc.text(`Part: ${inv.part}`, 14, 70);
+    doc.text(`Description: ${inv.part}`, 14, 70);
     doc.text(`Amount: R${Number(inv.amount).toLocaleString()}`, 14, 80);
     doc.text(`Status: ${inv.status}`, 14, 90);
-    doc.save(`Invoice_${inv.client}.pdf`);
+    doc.line(14,100,200,100);
+    doc.text("Thank you for your business!", 14, 110);
+    doc.save(`TCS_Invoice_${inv.client}.pdf`);
 }
 
 function displayParts(partsArray){
