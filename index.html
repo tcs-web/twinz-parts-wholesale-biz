@@ -395,7 +395,10 @@ function loadData(){
         pendingRequests.innerText=reqs.filter(([k,v])=>v.status==='pending').length;
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
-            tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button><button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
+            let actionBtn = v.status==='pending'
+           ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button>`
+            : `<button class="btn btn-red" onclick="markUndone('${k}')">Mark Undone</button>`;
+            tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${actionBtn}<button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
         requestsTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No requests yet</td></tr>';
     });
@@ -405,7 +408,10 @@ function loadData(){
         let invs=Object.entries(allInvoicesData);
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
-            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td><button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button><button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
+            let paidBtn = v.status==='paid'
+           ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
+            : `<button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button>`;
+            tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${paidBtn}<button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
         invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
     });
@@ -414,8 +420,9 @@ function loadData(){
 window.createInvoice = () => {
     if(!invClient.value ||!invPart.value ||!invAmount.value){ invMsg.innerText="Fill all fields"; return; }
     const amount = Number(invAmount.value);
-    const addVAT = addVAT.checked;
-    const vat = addVAT? amount * 0.15 : 0;
+    const vatCheckbox = document.getElementById('addVAT'); // FIXED: was conflicting with variable name
+    const applyVAT = vatCheckbox.checked;
+    const vat = applyVAT? amount * 0.15 : 0;
     const total = amount + vat;
 
     const newInvoice = {
@@ -425,7 +432,7 @@ window.createInvoice = () => {
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     invMsg.innerText = "Invoice Created! Downloading...";
     downloadInvoicePDFDirect(newInvoice);
-    invClient.value = invPhone.value = invEmail.value = invPart.value = invAmount.value = ''; addVAT.checked = false;
+    invClient.value = invPhone.value = invEmail.value = invPart.value = invAmount.value = ''; vatCheckbox.checked = false;
     setTimeout(()=>invMsg.innerText='',3000);
 }
 
@@ -449,7 +456,9 @@ window.createInvoiceFromRequest = (reqId) => {
 }
 
 window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
+window.markPending = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'pending'});
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
+window.markUndone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'pending'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
@@ -516,7 +525,7 @@ function downloadInvoicePDFDirect(inv) {
         doc.setTextColor(0,0,0);
     }
 
-    // FOOTER
+        // FOOTER
     doc.setFontSize(8); doc.setFont("helvetica","normal");
     doc.text("Bank: Standard Bank 1028459434 | WhatsApp: 0825247352 | 0698494596", 14, 280);
     doc.text("Thank you for choosing TCS PARTS BIZPORTAL", 14, 285);
