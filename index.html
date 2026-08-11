@@ -141,6 +141,7 @@
                 <div class="stat-card"><h1 id="totalParts">0</h1><p>Total Parts</p></div>
                 <div class="stat-card"><h1 id="totalRequests">0</h1><p>Total Requests</p></div>
                 <div class="stat-card"><h1 id="pendingRequests">0</h1><p>Pending</p></div>
+                <div class="stat-card" style="background:linear-gradient(135deg,#25D366,#128C7E);"><h1>R<span id="totalSales">0</span></h1><p>Total Sales</p></div>
             </div>
             <!-- INVOICE GENERATOR 1: WALK IN -->
             <div class="invoice-box">
@@ -210,7 +211,16 @@
             <div class="parts-list" id="partsList"></div>
         </div>
 
-        <div id="reports" class="tab-content"><h3>📑 Reports</h3><button class="btn btn-purple" onclick="downloadCSV()">Download CSV</button><button class="btn btn-red" onclick="downloadPDF()">Download PDF</button></div>
+        <div id="reports" class="tab-content">
+            <h3>📑 Reports</h3>
+            <button class="btn btn-purple" onclick="downloadCSV()">Download Stock CSV</button>
+            <button class="btn btn-green" onclick="downloadInvoiceCSV()">Download Invoices CSV</button>
+            <button class="btn btn-red" onclick="downloadPDF()">Download Stock PDF</button>
+            <div class="info-box" style="margin-top:15px;">
+                <h4>💰 Total Sales: R<span id="totalSalesReport">0</span></h4>
+                <p>Paid Invoices Only</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -346,6 +356,30 @@ window.openTab = (tabName) => {
     event.target.classList.add('active');
 }
 
+function updateTotalSales(){
+    let total = 0;
+    Object.values(allInvoicesData).forEach(inv=>{
+        if(inv.status === 'paid') total += Number(inv.amount);
+    });
+    totalSales.innerText = total.toLocaleString();
+    totalSalesReport.innerText = total.toLocaleString();
+}
+
+window.downloadInvoiceCSV = () => {
+    let csv = 'Date,Invoice No,Client,Phone,Part,Subtotal,VAT,Total,Status\n';
+    Object.values(allInvoicesData).forEach(inv=>{
+        if(inv.status === 'paid'){
+            csv+=`${inv.date},${inv.invoiceNo},${inv.client},${inv.phone},"${inv.part}",${inv.subtotal},${inv.vat},${inv.amount},${inv.status}\n`;
+        }
+    });
+    let totalPaid = Object.values(allInvoicesData).filter(i=>i.status==='paid').reduce((sum,i)=>sum+Number(i.amount),0);
+    csv+=`\n,,,,,,"TOTAL:",${totalPaid},"PAID"`;
+    let a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv]));
+    a.download=`TCS_Invoices_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user && ['ceo@tcspartsbizportal.co.za','manager@tcspartsbizportal.co.za'].includes(user.email)) {
     loginBox.style.display = 'none'; formBox.style.display = 'block'; loadData();
@@ -398,7 +432,7 @@ function loadData(){
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
             let actionBtn = v.status==='pending'
-        ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button> <button class="btn btn-purple" onclick="markPaidRequest('${k}')">Mark Paid</button>`
+       ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button> <button class="btn btn-purple" onclick="markPaidRequest('${k}')">Mark Paid</button>`
             : `<button class="btn btn-red" onclick="markUndone('${k}')">Mark Undone</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${actionBtn}<button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
@@ -411,11 +445,12 @@ function loadData(){
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
             let paidBtn = v.status==='paid'
-        ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
+       ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
             : `<button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${paidBtn}<button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
         invoicesTable.querySelector('tbody').innerHTML = tbody || '<tr><td colspan="7">No invoices yet</td></tr>';
+        updateTotalSales();
     });
 }
 
@@ -447,10 +482,8 @@ window.markPaid = (id) => {
         update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
         if(inv){
             let paidInv = {...inv, status: 'paid', invoiceNo: inv.invoiceNo || 'INV' + Date.now()};
-            downloadInvoicePDFDirect(paidInv); // DOWNLOAD FIRST
-            setTimeout(()=>{
-                alert("✅ Invoice Marked PAID and Downloaded");
-            }, 300);
+            setTimeout(()=>downloadInvoicePDFDirect(paidInv), 0);
+            setTimeout(()=>alert("✅ Invoice Marked PAID and Downloaded"), 300);
         }
     }
 }
@@ -469,10 +502,8 @@ window.createInvoiceFromRequest = (reqId) => {
         subtotal: amount, vat: vat, amount: total, status: 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now(), requestId: reqId
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
-    downloadInvoicePDFDirect(newInvoice); // DOWNLOAD FIRST
-    setTimeout(()=>{
-        alert("✅ Invoice Created for " + req.name);
-    }, 300);
+    setTimeout(()=>downloadInvoicePDFDirect(newInvoice), 0);
+    setTimeout(()=>alert("✅ Invoice Created for " + req.name), 300);
 }
 
 window.markPaidRequest = (id) => {
@@ -489,12 +520,8 @@ window.markPaidRequest = (id) => {
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
-    
-    downloadInvoicePDFDirect(newInvoice); // DOWNLOAD FIRST
-    
-    setTimeout(()=>{
-        alert("✅ Invoice Created and Marked PAID");
-    }, 500); 
+    setTimeout(()=>downloadInvoicePDFDirect(newInvoice), 0);
+    setTimeout(()=>alert("✅ Invoice Created and Marked PAID"), 500);
 }
 window.markPending = (id) => {
     if(confirm("Mark this invoice as PENDING?")){
