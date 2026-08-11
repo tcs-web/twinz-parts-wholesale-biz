@@ -461,11 +461,11 @@ window.createInvoiceFromRequest = (reqId) => {
 
 window.markPaid = (id) => {
     if(confirm("Mark this invoice as PAID?")){
-        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
         const inv = allInvoicesData[id];
+        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
         if(inv){
-            let paidInv = {...inv, status: 'paid'};
-            setTimeout(()=>downloadInvoicePDFDirect(paidInv), 500);
+            let paidInv = {...inv, status: 'paid', invoiceNo: inv.invoiceNo || 'INV' + Date.now()};
+            downloadInvoicePDFDirect(paidInv);
         }
     }
 }
