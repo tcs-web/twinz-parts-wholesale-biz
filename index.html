@@ -398,7 +398,7 @@ function loadData(){
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
             let actionBtn = v.status==='pending'
-         ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button> <button class="btn btn-purple" onclick="markPaidRequest('${k}')">Mark Paid</button>`
+        ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button> <button class="btn btn-purple" onclick="markPaidRequest('${k}')">Mark Paid</button>`
             : `<button class="btn btn-red" onclick="markUndone('${k}')">Mark Undone</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${actionBtn}<button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
@@ -411,7 +411,7 @@ function loadData(){
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
             let paidBtn = v.status==='paid'
-         ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
+        ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
             : `<button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${paidBtn}<button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
@@ -496,11 +496,12 @@ window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinI
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
 
-// NEW INVOICE FORMAT WITH LOGO
+// NEW INVOICE FORMAT WITH LOGO + FORCE DOWNLOAD
 function downloadInvoicePDFDirect(inv) {
     const {jsPDF}=window.jspdf;const doc=new jsPDF();
     const logo = new Image();
     logo.src = 'https://i.ibb.co/Q5MSVCC/IMG-20260605-WA0002.png';
+    logo.crossOrigin = "Anonymous";
 
     doc.addImage(logo, 'PNG', 14, 12, 25, 25);
     doc.setFontSize(11); doc.setFont("helvetica","bold");
@@ -563,7 +564,16 @@ function downloadInvoicePDFDirect(inv) {
     doc.text("Bank: Standard Bank 1028459434 | WhatsApp: 0825247352 | 0698494596", 14, 280);
     doc.text("Thank you for choosing TCS PARTS BIZPORTAL", 14, 285);
 
-    doc.save(`TCS_Invoice_${inv.invoiceNo}.pdf`);
+    // FORCE DOWNLOAD - works on Mark Paid click
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `TCS_Invoice_${inv.invoiceNo}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 window.downloadSingleInvoicePDF = (id) => {
