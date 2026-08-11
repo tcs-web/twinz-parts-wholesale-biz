@@ -441,6 +441,20 @@ window.createInvoice = () => {
 }
 
 // INVOICE GENERATOR 2 FUNCTION
+window.markPaid = (id) => {
+    if(confirm("Mark this invoice as PAID?")){
+        const inv = allInvoicesData[id];
+        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
+        if(inv){
+            let paidInv = {...inv, status: 'paid', invoiceNo: inv.invoiceNo || 'INV' + Date.now()};
+            downloadInvoicePDFDirect(paidInv); // DOWNLOAD FIRST
+            setTimeout(()=>{
+                alert("✅ Invoice Marked PAID and Downloaded");
+            }, 300);
+        }
+    }
+}
+
 window.createInvoiceFromRequest = (reqId) => {
     const req = allRequestsData[reqId];
     if(!req) return;
@@ -455,27 +469,12 @@ window.createInvoiceFromRequest = (reqId) => {
         subtotal: amount, vat: vat, amount: total, status: 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now(), requestId: reqId
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
-    alert("✅ Invoice Created for " + req.name);
-    downloadInvoicePDFDirect(newInvoice);
+    downloadInvoicePDFDirect(newInvoice); // DOWNLOAD FIRST
+    setTimeout(()=>{
+        alert("✅ Invoice Created for " + req.name);
+    }, 300);
 }
 
-window.markPaid = (id) => {
-    if(confirm("Mark this invoice as PAID?")){
-        const inv = allInvoicesData[id];
-        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
-        if(inv){
-            let paidInv = {...inv, status: 'paid', invoiceNo: inv.invoiceNo || 'INV' + Date.now()};
-            downloadInvoicePDFDirect(paidInv);
-        }
-    }
-}
-window.markPending = (id) => {
-    if(confirm("Mark this invoice as PENDING?")){
-        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'pending'});
-    }
-}
-window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
-window.markUndone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'pending'});
 window.markPaidRequest = (id) => {
     const req = allRequestsData[id];
     if(!req) return;
@@ -490,8 +489,20 @@ window.markPaidRequest = (id) => {
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
-    alert("✅ Invoice Created and Marked PAID");
+    
+    downloadInvoicePDFDirect(newInvoice); // DOWNLOAD FIRST
+    
+    setTimeout(()=>{
+        alert("✅ Invoice Created and Marked PAID");
+    }, 500); 
 }
+window.markPending = (id) => {
+    if(confirm("Mark this invoice as PENDING?")){
+        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'pending'});
+    }
+}
+window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
+window.markUndone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'pending'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
