@@ -396,7 +396,7 @@ function loadData(){
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
             let actionBtn = v.status==='pending'
-           ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button>`
+          ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button>`
             : `<button class="btn btn-red" onclick="markUndone('${k}')">Mark Undone</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${actionBtn}<button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
@@ -409,7 +409,7 @@ function loadData(){
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
             let paidBtn = v.status==='paid'
-           ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
+          ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
             : `<button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${paidBtn}<button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
@@ -420,7 +420,7 @@ function loadData(){
 window.createInvoice = () => {
     if(!invClient.value ||!invPart.value ||!invAmount.value){ invMsg.innerText="Fill all fields"; return; }
     const amount = Number(invAmount.value);
-    const vatCheckbox = document.getElementById('addVAT'); // FIXED: was conflicting with variable name
+    const vatCheckbox = document.getElementById('addVAT');
     const applyVAT = vatCheckbox.checked;
     const vat = applyVAT? amount * 0.15 : 0;
     const total = amount + vat;
@@ -455,8 +455,16 @@ window.createInvoiceFromRequest = (reqId) => {
     downloadInvoicePDFDirect(newInvoice);
 }
 
-window.markPaid = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
-window.markPending = (id) => update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'pending'});
+window.markPaid = (id) => {
+    if(confirm("Mark this invoice as PAID?")){
+        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'paid'});
+    }
+}
+window.markPending = (id) => {
+    if(confirm("Mark this invoice as PENDING?")){
+        update(ref(db, `tcs-parts-bizportal/invoices/${id}`), {status: 'pending'});
+    }
+}
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.markUndone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'pending'});
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
@@ -517,7 +525,7 @@ function downloadInvoicePDFDirect(inv) {
     doc.setFont("helvetica","bold");
     doc.text(`TOTAL: R${Number(inv.amount).toFixed(2)}`, 140, y);
 
-    // PAID STAMP
+    // PAID STAMP - shows when status is paid
     if(inv.status === 'paid'){
         doc.setTextColor(0,180,0);
         doc.setFontSize(40); doc.setFont("helvetica","bold");
@@ -525,7 +533,7 @@ function downloadInvoicePDFDirect(inv) {
         doc.setTextColor(0,0,0);
     }
 
-        // FOOTER
+    // FOOTER
     doc.setFontSize(8); doc.setFont("helvetica","normal");
     doc.text("Bank: Standard Bank 1028459434 | WhatsApp: 0825247352 | 0698494596", 14, 280);
     doc.text("Thank you for choosing TCS PARTS BIZPORTAL", 14, 285);
