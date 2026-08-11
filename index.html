@@ -48,7 +48,7 @@
     @media (min-width: 768px) {.parts-list{grid-template-columns:1fr 1fr 1fr;}}
 .category-badge{background:#8B5CF6;color:white;padding:3px 8px;border-radius:12px;font-size:11px;margin-left:5px;}
 .invoice-box{background:#fff3e0;padding:15px;border-radius:12px;margin:15px 0;border-left:4px solid #FF8C00;}
-.checkbox-row{display:flex;align-items:center;gap:8px;margin:10px 0;}
+.checkbox-row{display:flex;align-items:center;gap:15px;margin:10px 0;flex-wrap:wrap;}
 
 /* CLIENT SHOP STYLE */
 #clientApp{background:#f5f7fa;padding:10px;}
@@ -153,6 +153,8 @@
                 <div class="checkbox-row">
                     <input type="checkbox" id="addVAT">
                     <label for="addVAT">Add 15% VAT</label>
+                    <input type="checkbox" id="markPaidNow">
+                    <label for="markPaidNow">Mark as Paid</label>
                 </div>
                 <button class="btn btn-purple" onclick="createInvoice()">Generate Invoice</button>
                 <p id="invMsg" style="color:green;"></p>
@@ -396,7 +398,7 @@ function loadData(){
         let tbody = '';
         reqs.reverse().forEach(([k,v])=>{
             let actionBtn = v.status==='pending'
-          ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button>`
+         ? `<button class="btn btn-green" onclick="markDone('${k}')">Mark Done</button> <button class="btn btn-purple" onclick="markPaidRequest('${k}')">Mark Paid</button>`
             : `<button class="btn btn-red" onclick="markUndone('${k}')">Mark Undone</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.name}</td><td>${v.phone}</td><td>${v.vehicle||'-'}</td><td>${v.part}</td><td><span style="background:${v.status==='pending'?'#FFA500':'#4CAF50'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${actionBtn}<button class="btn btn-purple" onclick="createInvoiceFromRequest('${k}')">Invoice</button></td></tr>`;
         });
@@ -409,7 +411,7 @@ function loadData(){
         let tbody = '';
         invs.reverse().forEach(([k,v])=>{
             let paidBtn = v.status==='paid'
-          ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
+         ? `<button class="btn btn-red" onclick="markPending('${k}')">Mark Pending</button>`
             : `<button class="btn btn-green" onclick="markPaid('${k}')">Mark Paid</button>`;
             tbody += `<tr><td>${v.date}</td><td>${v.client}</td><td>${v.phone}</td><td>${v.part}</td><td>R${Number(v.amount).toLocaleString()}</td><td><span style="background:${v.status==='paid'?'#4CAF50':'#FFA500'};color:white;padding:3px 8px;border-radius:4px;">${v.status}</span></td><td>${paidBtn}<button class="btn btn-blue" onclick="downloadSingleInvoicePDF('${k}')">PDF</button></td></tr>`;
         });
@@ -421,18 +423,20 @@ window.createInvoice = () => {
     if(!invClient.value ||!invPart.value ||!invAmount.value){ invMsg.innerText="Fill all fields"; return; }
     const amount = Number(invAmount.value);
     const vatCheckbox = document.getElementById('addVAT');
+    const paidCheckbox = document.getElementById('markPaidNow');
     const applyVAT = vatCheckbox.checked;
+    const isPaid = paidCheckbox.checked;
     const vat = applyVAT? amount * 0.15 : 0;
     const total = amount + vat;
 
     const newInvoice = {
         client: invClient.value, phone: invPhone.value, email: invEmail.value, part: invPart.value,
-        subtotal: amount, vat: vat, amount: total, status: 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now()
+        subtotal: amount, vat: vat, amount: total, status: isPaid? 'paid' : 'pending', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now()
     };
     push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
     invMsg.innerText = "Invoice Created! Downloading...";
     downloadInvoicePDFDirect(newInvoice);
-    invClient.value = invPhone.value = invEmail.value = invPart.value = invAmount.value = ''; vatCheckbox.checked = false;
+    invClient.value = invPhone.value = invEmail.value = invPart.value = invAmount.value = ''; vatCheckbox.checked = false; paidCheckbox.checked = false;
     setTimeout(()=>invMsg.innerText='',3000);
 }
 
@@ -467,6 +471,22 @@ window.markPending = (id) => {
 }
 window.markDone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
 window.markUndone = (id) => update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'pending'});
+window.markPaidRequest = (id) => {
+    const req = allRequestsData[id];
+    if(!req) return;
+    const amount = Number(prompt(`Mark ${req.name}'s request as PAID\nEnter Amount R:`));
+    if(!amount) return;
+    const addVAT = confirm("Add 15% VAT?");
+    const vat = addVAT? amount * 0.15 : 0;
+    const total = amount + vat;
+    const newInvoice = {
+        client: req.name, phone: req.phone, email: '', part: req.part + ' - ' + req.vehicle,
+        subtotal: amount, vat: vat, amount: total, status: 'paid', date: new Date().toLocaleString(), invoiceNo: 'INV' + Date.now(), requestId: id
+    };
+    push(ref(db, 'tcs-parts-bizportal/invoices'), newInvoice);
+    update(ref(db, `tcs-parts-bizportal/requests/${id}`), {status: 'done'});
+    alert("✅ Invoice Created and Marked PAID");
+}
 window.decodeVIN = () => {vinResult.innerHTML=`<div class="info-box">VIN: ${vinInput.value}<br>Connect to API for real data</div>`}
 window.downloadCSV = () => {let csv='Year,Make,Model,Category,Part,Price,Status\n';Object.values(allPartsData).forEach(p=>csv+=`${p.year},${p.make},${p.model},${p.category},${p.partName},${p.price},${p.status}\n`);let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv]));a.download='TCS_Stock.csv';a.click();}
 window.downloadPDF = () => {const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text("TCS PARTS STOCK REPORT",14,15);let y=30;Object.values(allPartsData).forEach(p=>{doc.text(`${p.year} ${p.make} ${p.category} ${p.partName} R${p.price}`,14,y);y+=10;});doc.save("TCS_Report.pdf");}
