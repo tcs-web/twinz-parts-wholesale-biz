@@ -367,16 +367,29 @@ function updateTotalSales(){
 
 window.downloadInvoiceCSV = () => {
     let csv = 'Date,Invoice No,Client,Phone,Part,Subtotal,VAT,Total,Status\n';
-    Object.values(allInvoicesData).forEach(inv=>{
-        if(inv.status === 'paid'){
-            csv+=`${inv.date},${inv.invoiceNo},${inv.client},${inv.phone},"${inv.part}",${inv.subtotal},${inv.vat},${inv.amount},${inv.status}\n`;
-        }
+    
+    // Export ALL invoices, not just paid
+    let invoices = Object.values(allInvoicesData);
+    
+    if(invoices.length === 0){
+        alert("No invoices found in database yet. Create an invoice first.");
+        return;
+    }
+
+    invoices.forEach(inv=>{
+        csv+=`${inv.date},${inv.invoiceNo},${inv.client},${inv.phone},"${inv.part}",${inv.subtotal},${inv.vat},${inv.amount},${inv.status}\n`;
     });
-    let totalPaid = Object.values(allInvoicesData).filter(i=>i.status==='paid').reduce((sum,i)=>sum+Number(i.amount),0);
-    csv+=`\n,,,,,,"TOTAL:",${totalPaid},"PAID"`;
+
+    let totalPaid = invoices.filter(i=>i.status==='paid').reduce((sum,i)=>sum+Number(i.amount),0);
+    let totalPending = invoices.filter(i=>i.status==='pending').reduce((sum,i)=>sum+Number(i.amount),0);
+    
+    csv+=`\n,,,,,,"TOTAL PAID:",${totalPaid},"PAID"`;
+    csv+=`\n,,,,,,"TOTAL PENDING:",${totalPending},"PENDING"`;
+    csv+=`\n,,,,,,"GRAND TOTAL:",${totalPaid+totalPending},"ALL"`;
+
     let a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([csv]));
-    a.download=`TCS_Invoices_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download=`TCS_All_Invoices_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
 }
 
